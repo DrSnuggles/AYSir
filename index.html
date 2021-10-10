@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="AY Sir"/>
+  <title>AY Sir</title>
+  <style>
+    div {
+      text-align: center;
+    }
+    [onclick],
+    [oninput]{
+      cursor: pointer;
+    }
+  </style>
+  <script src="./js/aysir.js" type="module"></script>
+</head>
+<body>
+  🎼<select id="songSel" onchange="AYSir.playURL(this.value)"></select>
+  ⚙️<select id="EngineSel" onchange="AYSir.setEngine(this.value)">
+    <option value="ayumi">Ayumi</option>
+    <option value="gasman">Demozoo</option>
+    <!--
+    <option value="vecx">Vecx (hangs)</option>
+    <option value="nonameno">CODEF (does not exist yet)</option>
+    -->
+  </select>
+
+  <div onclick="AYSir.loadAndPlayNextSong()" style="font-size:300%" title="Play random song">👉🎰👈</div>
+  
+  <div><span onclick="AYSir.setGain(0);volume.value=0">🔈</span><input id="volume" oninput="AYSir.setGain(this.value)" type="range" min="0.0" max="1.0" value="0.25" step="0.0001" style="width: 80vw;"><span onclick="AYSir.setGain(1);volume.value=1">🔊</span></div>
+  <div>00:00<input id="position" oninput="AYSir.setPos(this.value)" type="range" min="0.0" max="1.0" value="0" step="0.0001" style="width: 80vw;"><span id="songLen">00:00</span></div>
+
+  <h1 id="trackName"></h1>
+  <h2 id="authorName"></h2>
+  <h3 id="commentName"></h3>
+  
+</body>
+</html>
