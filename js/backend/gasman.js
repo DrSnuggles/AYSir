@@ -101,7 +101,7 @@ class Gasman extends AudioWorkletProcessor {
   
   process(inputList, outputList, parameters) {
 
-    for(let i = 0; i < outputList[0][0].length; i+=2) {
+    for(let i = 0; i < outputList[0][0].length; i++) {
       this.toneGeneratorACounter -= this.cyclesPerSample
       while (this.toneGeneratorACounter < 0) {
         this.toneGeneratorACounter += this.toneGeneratorAPeriod
@@ -177,7 +177,7 @@ class Gasman extends AudioWorkletProcessor {
       outputList[0][0][i] = (
         this.panVolumeAdjust[0][0] * levelA + this.panVolumeAdjust[1][0] * levelB + this.panVolumeAdjust[2][0] * levelC
       )
-      outputList[0][0][i+1] = (
+      outputList[1][0][i] = (
         this.panVolumeAdjust[0][1] * levelA + this.panVolumeAdjust[1][1] * levelB + this.panVolumeAdjust[2][1] * levelC
       )
     }

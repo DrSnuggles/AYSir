@@ -92,8 +92,13 @@ async function setEngine(eng) {
   
   // now reinit the whole audio ctx incl. worklet
   ctx = new AudioContext(/*{sampleRate: 27344}*/) // 22050 is bit too low
+  console.log(ctx)
   await ctx.audioWorklet.addModule(`./js/backend/${eng}.js`)
-  node = new AudioWorkletNode(ctx, `${eng}-audio-processor`)
+  node = new AudioWorkletNode(ctx, `${eng}-audio-processor`, {
+    numberOfInputs: 0,
+    numberOfOutputs: 2,
+    outputChannelCount: [1, 1]
+  })
   node.port.onmessage = (e) => console.log(e.data) // this direction is not used
 
   //node.connect(ctx.destination) // no gain in between this time
@@ -102,7 +107,39 @@ async function setEngine(eng) {
   node.connect(gain)
   gain.connect(ctx.destination)
   setGain(gainVal)
-
+  
+  // rewire for analyzers (two) from worklet node, oops it's different, will keep my normal aproach here for reference, also had to change the backends
+  /*
+  console.log(node)
+  //const source = ctx.createMediaElementSource(testAudio) // works
+  const source = ctx.createGain()
+  node.connect(source)
+  const splitter = ctx.createChannelSplitter(2) // source.channelCount
+  const left = ctx.createStereoPanner()
+  const right = ctx.createStereoPanner()
+  source.connect(splitter) // here i use node and not the biased gain
+  splitter.connect(left, 0)
+  splitter.connect(right, 1)
+  left.pan.value = -1.0
+  right.pan.value = 1.0
+  */
+  const anaL = ctx.createAnalyser()
+  const anaR = ctx.createAnalyser()
+  node.connect(anaL, 0, 0)
+  node.connect(anaR, 1, 0)
+  function analLoop() {
+    requestAnimationFrame(analLoop)  
+    const dataL = new Float32Array(anaL.frequencyBinCount)
+    const dataR = new Float32Array(anaR.frequencyBinCount)
+    anaL.getFloatTimeDomainData(dataL)
+    anaR.getFloatTimeDomainData(dataR)
+    //if (dataR && (dataL[0] !== dataR[0])) console.log(dataL[0], dataR[0]) // todo: check why right[n] == 0
+    // here i have to set the gl vars
+    //gl.uniform2f(analData, dataL, dataR)
+  }
+  requestAnimationFrame(analLoop)
+  
+  // stupid no audio till user interaction policy thingy
   function resume(){if (ctx.state !== 'running') ctx.resume()}
   addEventListener('keydown', resume)
   addEventListener('click', resume)

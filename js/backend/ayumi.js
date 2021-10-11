@@ -91,17 +91,15 @@ class AYUMI extends AudioWorkletProcessor {
   } // constructor
   
   process(inputList, outputList, parameters) {
-    for(let i = 0; i < outputList[0][0].length; i+=2) {
-      let left = [], right = [] // use arrays, so we can make as many as we want easily
+    const outputCount = outputList.length
+    const channelCount = outputList[0].length
+    const bufferSize = outputList[0][0].length
+//    console.log('ouputs', outputCount, 'channels', channelCount, 'bufferSize', bufferSize)
+    for(let i = 0; i < bufferSize; i++) {
       this.AYUMIprocess()
       this.removeDC()
-      
-      if (this.isTurbo) {
-        
-      }
       outputList[0][0][i] = this.left
-      outputList[0][0][i+1] = this.right
-
+      outputList[1][0][i] = this.right
     }
 
     return true // def. needed for Chrome

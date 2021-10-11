@@ -4,6 +4,11 @@ AY Player
 Maybe rename to YAMY (yummi), MAYY (may why), YMAY (why may), AMYY (amy why)
 
 ## Not sure what will happen here
+11.10.2021: Found out that with worklets it's a bit different to access the 2nd channel. So i had to rework the backends a bit to support 2 outputs, still not channels but at least accessible for the analyzer node.
+
+10.10.2021: I will continue here with my goniometer, but this time a more modern shader version, maybe... :)
+
+
 10.10.2021: Finalized a bit. Move on.. move on! Use the na(t)ive select to see that audio worklet is not interrupted by main ui thread. Click on slot machine for random song.
 
 06.10.2021: I did dome tests with other Worklet, PaintWorklet. Not nice since it's on main thread and there is no message port for com.
