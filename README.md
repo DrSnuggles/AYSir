@@ -4,6 +4,7 @@ AY Player
 Maybe rename to YAMY (yummi), MAYY (may why), YMAY (why may), AMYY (amy why)
 
 ## Not sure what will happen here
+11.10.2021: Put old goniometer in a OffscreenCanvas worker, done
 11.10.2021: Quickly hooked up my old goniometer, maybe add an output channel for each A,B,C-channel
 
 11.10.2021: Found out that with worklets it's a bit different to access the 2nd channel. So i had to rework the backends a bit to support 2 outputs, still not channels but at least accessible for the analyzer node.
