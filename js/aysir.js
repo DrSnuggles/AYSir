@@ -127,15 +127,114 @@ async function setEngine(eng) {
   const anaR = ctx.createAnalyser()
   node.connect(anaL, 0, 0)
   node.connect(anaR, 1, 0)
+  const anaCtx = myViz.getContext('2d')
+  const width = myViz.width
+  const height = myViz.height
   function analLoop() {
     requestAnimationFrame(analLoop)  
+    /*
     const dataL = new Float32Array(anaL.frequencyBinCount)
     const dataR = new Float32Array(anaR.frequencyBinCount)
     anaL.getFloatTimeDomainData(dataL)
     anaR.getFloatTimeDomainData(dataR)
+    */
     //if (dataR && (dataL[0] !== dataR[0])) console.log(dataL[0], dataR[0]) // todo: check why right[n] == 0
     // here i have to set the gl vars
     //gl.uniform2f(analData, dataL, dataR)
+
+    //
+    // old version, see: https://github.com/DrSnuggles/jsGoniometer/blob/jsGoniometer/goniometer.js
+    //
+    clearGoniometer()
+    drawBGlines()
+    drawGoniometer() // also gets data
+
+    function clearGoniometer() {
+      // clear/fade out old
+      anaCtx.fillStyle = 'rgba(0, 0, 0, 255)'
+      anaCtx.fillRect(0, 0, width, height)
+    }
+    
+    function drawBGlines() {
+      anaCtx.lineWidth = 1
+      anaCtx.strokeStyle = 'rgba(30, 200, 10, 255)'
+      anaCtx.beginPath()
+
+      // x - axis
+      anaCtx.moveTo(0, height/2)
+      anaCtx.lineTo(width, height/2)
+
+      // y - axis
+      anaCtx.moveTo(width/2, 0)
+      anaCtx.lineTo(width/2, height)
+
+      // l - axis
+      anaCtx.moveTo(0, 0)
+      anaCtx.lineTo(width, height)
+
+      // r - axis
+      anaCtx.moveTo(width, 0)
+      anaCtx.lineTo(0, height)
+
+      // circles/ellipses
+      // 50%
+      anaCtx.moveTo(width/2 + width/2 /2, height/2)
+      anaCtx.ellipse(width/2, height/2, width/2 /2, height/2 /2, 0, 0, 2*Math.PI)
+
+      // 75%
+      anaCtx.moveTo(width/2 + width/2 /(4/3), height/2)
+      anaCtx.ellipse(width/2, height/2, width/2 /(4/3), height/2 /(4/3), 0, 0, 2*Math.PI)
+
+      // 100%
+      anaCtx.moveTo(width/2 + width/2, height/2)
+      anaCtx.ellipse(width/2, height/2, width/2, height/2, 0, 0, 2*Math.PI)
+
+      anaCtx.stroke() // finally draw
+    }
+    
+    function drawGoniometer() {
+      var dataL = new Float32Array(anaL.frequencyBinCount)
+      var dataR = new Float32Array(anaR.frequencyBinCount)
+      anaL.getFloatTimeDomainData(dataL)
+      anaR.getFloatTimeDomainData(dataR)
+
+      anaCtx.lineWidth = 1
+      anaCtx.strokeStyle = 'rgba(30, 200, 10, 255)'
+      anaCtx.beginPath()
+
+      var rotated
+
+      // move to start point
+      rotated = rotate45deg(dataR[0], dataL[0]);  // Right channel is mapped to x axis
+      anaCtx.moveTo(rotated.x * width + width/2, rotated.y* height + height/2)
+
+      // draw line
+      for (var i = 1; i < dataL.length; i++) {
+       rotated = rotate45deg(dataR[i], dataL[i])
+       anaCtx.lineTo(rotated.x * width + width/2, rotated.y* height + height/2)
+      }
+
+      anaCtx.stroke()
+    }
+    function rotate45deg(x, y) {
+      var tmp = cartesian2polar(x, y)
+      tmp.angle -= 0.78539816 // Rotate coordinate by 45 degrees
+      var tmp2 = polar2cartesian(tmp.radius, tmp.angle)
+      return {x:tmp2.x, y:tmp2.y}
+    }
+    function cartesian2polar(x, y) {
+      // Convert cartesian to polar coordinate
+      var radius = Math.sqrt((x * x) + (y * y))
+      var angle = Math.atan2(y,x) // atan2 gives full circle
+      return {radius:radius, angle:angle}
+    }
+    function polar2cartesian(radius, angle) {
+      // Convert polar coordinate to cartesian coordinate
+      var x = radius * Math.sin(angle)
+      var y = radius * Math.cos(angle)
+      return {x:x, y:y}
+    }
+    
   }
   requestAnimationFrame(analLoop)
   

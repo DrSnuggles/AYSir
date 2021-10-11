@@ -4,10 +4,11 @@ AY Player
 Maybe rename to YAMY (yummi), MAYY (may why), YMAY (why may), AMYY (amy why)
 
 ## Not sure what will happen here
+11.10.2021: Quickly hooked up my old goniometer, maybe add an output channel for each A,B,C-channel
+
 11.10.2021: Found out that with worklets it's a bit different to access the 2nd channel. So i had to rework the backends a bit to support 2 outputs, still not channels but at least accessible for the analyzer node.
 
 10.10.2021: I will continue here with my goniometer, but this time a more modern shader version, maybe... :)
-
 
 10.10.2021: Finalized a bit. Move on.. move on! Use the na(t)ive select to see that audio worklet is not interrupted by main ui thread. Click on slot machine for random song.
 
@@ -136,13 +137,17 @@ https://www.fenarinarsa.com/?p=1454
 
 ## Credits
 AYUMI Original Author: Peter Sovietov
+
 AYUMI Javascript version: Alexander Kovalenko
 
 Demozoo / Cowbell / Matt "Gasman" Westcott: https://github.com/demozoo/cowbell
+
 ^^ Backend and format readers
 
 FYMReader Original: http://pure-garden-1548.herokuapp.com/
+
 FYMReader v5: https://ym.mmcm.ru/
 
 UZIP ES6 module version from Greggman: https://github.com/greggman/uzip-module
+
 LH4: many see header

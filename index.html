@@ -13,6 +13,11 @@
     [oninput]{
       cursor: pointer;
     }
+    #myViz {
+      width: min(50vw, 50vh);
+      height: min(50vw, 50vh);
+      background: #000;
+    }
   </style>
   <script src="./js/aysir.js" type="module"></script>
 </head>
@@ -35,6 +40,8 @@
   <h1 id="trackName"></h1>
   <h2 id="authorName"></h2>
   <h3 id="commentName"></h3>
+  
+  <canvas id="myViz" width="500" height="500"></canvas>
   
 </body>
 </html>
