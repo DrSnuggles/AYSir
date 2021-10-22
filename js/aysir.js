@@ -178,6 +178,11 @@ function playURL(url) {
   })
   .then(b=>new Uint8Array(b))
   .then(b=>{
+    // check if we got stupid content
+    // <!DOCTYPE
+    //60, 33, 68, 79, 67, 84, 89, 80,
+    // this means a URL encoding prob in CORS worker !! ToDo in other project, but should be handled
+    if (b[0] === 60 && b[1] === 33 && b[2] === 68 && b[3] === 79) throw 'Got HTML content not a data buffer'
     worker.postMessage({msg:'buf', ext: url.substr(-3).toLowerCase(), buf:b})
     isLoading = false
   })
@@ -265,49 +270,106 @@ fym6ch.forEach(e => {
 html.push('</optgroup')
 songSel.insertAdjacentHTML('beforeEnd',html.join(''))
 */
+songSel.onclick = function(ev) {
+  ev.preventDefault()
+}
 
-console.time('process modland list')
-fetch('allmods.txt')
-.then(r => r.text())
-.then(t => t.split('\n'))
-.then(a => {
-  let html = []
-  for (let i = 0; i < a.length; i++) {
-    const entry = a[i].split('\t')[1]
-    if (!entry) continue // skip blank lines (last)
-    
-    const tmp = entry.split('/')
-    const format = tmp[0]
-    const author = tmp[1]
-    const title = tmp[tmp.length-1]
-    const ext = title.substr(title.indexOf('.')).toLowerCase()
-    if (['.psg','.ym','.vtx','.fym'].indexOf(ext) !== -1) {
-      let url = 'https://ftp.modland.com/pub/modules/' + entry
-      html.push(`<option value="${url}">${author} ${title}</option>`)
-      songs.push(url)
+fillMmcm(fillModland)
+//fillModland()
+
+function fillMmcm(cb) {
+  console.time('process mmcm list')
+  fetch('mmcm.json')
+  .then(r => r.json())
+  .then(j => {
+    const k = Object.keys(j)
+    const html = []
+    let l = 0
+    const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
+    html.push(`<optgroup label="MccM's FYM archive">`)
+    for (let i = 0; i < k.length; i++) {
+      if (k[i].indexOf(' ') === -1) {
+        html.push(`<optgroup label="${k[i]}">`)
+        for (let e = 0; e < j[k[i]].length; e++) {
+          if (j[k[i]][e].indexOf(' ') === -1) {
+            const url = urlStart + k[i] +'/'+ j[k[i]][e]
+            html.push(`<option value="${url}">${j[k[i]][e]}</option>`)
+            songs.push(url)
+            l++
+          } // space inside songname
+        }
+        html.push(`</optgroup>`)
+      } // space inside musician
     }
-  }
-  //console.log(a)
-  songSel.insertAdjacentHTML('beforeEnd',html.join(''))
-  songSel.onclick = function(ev) {
-    ev.preventDefault()
-  }
-  /*
-  songSel.onchange = function(ev) {
-    playURL(`${songSel.value}`)
-  }
-  */
-  songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
-  console.timeEnd('process modland list')
-  console.log('Songlist contains: ', songs.length)
+    html.push(`</optgroup>`)
+    songSel.insertAdjacentHTML('beforeEnd',html.join(''))
 
-  //
-  // start the show, emm audio
-  //
-  loadAndPlayNextSong()
+    console.timeEnd('process mmcm list')
+    console.log('MmcM songlist contains: ', l)
+
+    //
+    // callback
+    //
+    cb()
+    
+  })
+  .catch(e=>console.error(e))
   
-})
-.catch(e=>console.error(e))
+}
+
+function fillModland() {
+  console.time('process modland list')
+  fetch('modland.txt')
+  .then(r => r.text())
+  .then(t => t.split('\n'))
+  .then(a => {
+    const html = []
+    let l = 0
+    let lastAuthor = ''
+    html.push(`<optgroup label="Modland VTX/YM archive">`)
+    for (let i = 0; i < a.length; i++) {
+      const entry = a[i].split('\t')[1]
+      if (!entry) continue // skip blank lines (last)
+      
+      const tmp = entry.split('/')
+      const format = tmp[0]
+      const author = tmp[1]
+      const title = tmp[tmp.length-1]
+      const ext = title.substr(title.indexOf('.')).toLowerCase()
+      if (['.ym','.vtx'].indexOf(ext) !== -1) {
+        const url = 'https://ftp.modland.com/pub/modules/' + entry
+        const authorChange = (lastAuthor !== author)
+        if (authorChange) {
+          if (lastAuthor !== '') html.push(`</optgroup>`)
+          html.push(`<optgroup label="${author}">`)
+          lastAuthor = author
+        }
+        html.push(`<option value="${url}">${title}</option>`)
+
+        songs.push(url)
+        l++
+      }
+    }
+    html.push(`</optgroup>`)
+    html.push(`</optgroup>`)
+
+    //console.log(a)
+    songSel.insertAdjacentHTML('beforeEnd',html.join(''))
+
+    songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
+
+    console.timeEnd('process modland list')
+    console.log('Modland songlist contains: ', l)
+
+    //
+    // start the show, emm audio
+    //
+    loadAndPlayNextSong()
+    
+  })
+  .catch(e=>console.error(e))
+  
+}
 
 //
 // set globals for external (HTML/UI) use

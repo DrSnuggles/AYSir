@@ -3,7 +3,21 @@ AY Player
 
 Maybe rename to YAMY (yummi), MAYY (may why), YMAY (why may), AMYY (amy why)
 
+ToDo:
+- Random on/off
+- Save last index to localStorage
+- Add Norbert Kehrer's soundtrakker_player
+
+## Maybe helpful Firefox config changes
+about:config
+	dom.moduleScripts.enabled
+	gfx.offscreencanvas.enabled
+
 ## Not sure what will happen here
+17.10.2021:
+- Songs from modland 5759 (.ym, .vtx)
+- Songs from MccM 8807 (.fym) (needed proxy to pass CORS)
+
 11.10.2021: Put old goniometer in a OffscreenCanvas worker, done
 11.10.2021: Quickly hooked up my old goniometer, maybe add an output channel for each A,B,C-channel
 

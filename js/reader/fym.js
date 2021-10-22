@@ -68,7 +68,9 @@ export class FYMReader {
     
     const regs = []
     for(let r = 0; r < 14; r++) {
-      regs[r] = this.dump.getUint8(r * this.frameCount + this.frame + this.offset)
+      const pPos = r * this.frameCount + this.frame + this.offset
+      if (pPos < this.dump.byteLength)
+        regs[r] = this.dump.getUint8(pPos)
     }
     if (this.isTurbo) {
       const turboOffset = this.frameCount*14
