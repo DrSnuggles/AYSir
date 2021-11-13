@@ -13,7 +13,7 @@ class VecxAudioProcessor extends AudioWorkletProcessor {
   // When constructor() undefined, the default constructor will be implicitly used.
   constructor() {
     super()
-    this.port.onmessage = this.handleMessage_.bind(this)
+	this.port.onmessage = (e) => this.handleMessage_(e)
     
     this.psg = {
       index: 0,
@@ -272,22 +272,22 @@ class VecxAudioProcessor extends AudioWorkletProcessor {
     AY_ESHAPE = 13,
 
     AY_PORTA = 14,
-    AY_PORTB = 15
+    AY_PORTB = 15;
 
-    var idx = 0
-    var outn = 0
+    var idx = 0;
+    var outn = 0;
 
     /* hack to prevent us from hanging when starting filtered outputs */
     /*
     if (!this.psg.ready || !this.enabled) {
-      //memset(stream, 0, length * sizeof(*stream))
+      //memset(stream, 0, length * sizeof(*stream));
       for(var i = 0; i < length; i++) {
-        stream[i] = 0
+        stream[i] = 0;
       }
-      return
+      return;
     }
     */
-    length = length << 1
+    length = length << 1;
 
     /* The 8910 has three outputs, each output is the mix of one of the three */
     /* tone generators and of the (single) noise generator. The two are mixed */
@@ -302,58 +302,54 @@ class VecxAudioProcessor extends AudioWorkletProcessor {
     /* Setting the output to 1 is necessary because a disabled channel is locked */
     /* into the ON state (see above); and it has no effect if the volume is 0. */
     /* If the volume is 0, increase the counter, but don't touch the output. */
-    if (this.psg.Regs[AY_ENABLE] & 0x01) {
-      if (this.psg.CountA <= length) this.psg.CountA += length
-      this.psg.OutputA = 1
+	if (this.psg.Regs[AY_ENABLE] & 0x01) {
+      if (this.psg.CountA <= length) this.psg.CountA += length;
+      this.psg.OutputA = 1;
     } else if (this.psg.Regs[AY_AVOL] == 0) {
       /* note that I do count += length, NOT count = length + 1. You might think */
       /* it's the same since the volume is 0, but doing the latter could cause */
       /* interferencies when the program is rapidly modulating the volume. */
-      if (this.psg.CountA <= length) this.psg.CountA += length
+      if (this.psg.CountA <= length) this.psg.CountA += length;
     }
     if (this.psg.Regs[AY_ENABLE] & 0x02) {
-      if (this.psg.CountB <= length) this.psg.CountB += length
-      this.psg.OutputB = 1
+      if (this.psg.CountB <= length) this.psg.CountB += length;
+      this.psg.OutputB = 1;
     } else if (this.psg.Regs[AY_BVOL] == 0) {
-      if (this.psg.CountB <= length) this.psg.CountB += length
+      if (this.psg.CountB <= length) this.psg.CountB += length;
     }
     if (this.psg.Regs[AY_ENABLE] & 0x04) {
-      if (this.psg.CountC <= length) this.psg.CountC += length
-      this.psg.OutputC = 1
+      if (this.psg.CountC <= length) this.psg.CountC += length;
+      this.psg.OutputC = 1;
     } else if (this.psg.Regs[AY_CVOL] == 0) {
-      if (this.psg.CountC <= length) this.psg.CountC += length
+      if (this.psg.CountC <= length) this.psg.CountC += length;
     }
 
     /* for the noise channel we must not touch OutputN - it's also not necessary */
     /* since we use outn. */
     if ((this.psg.Regs[AY_ENABLE] & 0x38) == 0x38)	/* all off */
-      if (this.psg.CountN <= length) this.psg.CountN += length
+      if (this.psg.CountN <= length) this.psg.CountN += length;
 
-    outn = (this.psg.OutputN | this.psg.Regs[AY_ENABLE])
+    outn = (this.psg.OutputN | this.psg.Regs[AY_ENABLE]);
+
     /* buffering loop */
     while (length > 0) {
-//console.log('stuck 1...')
-
-      var vol
-      var left = 2
+	  var vol;
+      var left  = 2;
       /* vola, volb and volc keep track of how long each square wave stays */
       /* in the 1 position during the sample period. */
 
-      var vola, volb, volc
-      vola = volb = volc = 0
+      var vola, volb, volc;
+      vola = volb = volc = 0;
 
       do {
-//console.log('stuck 2...')
-        var nextevent
+        var nextevent;
 
-        if (this.psg.CountN < left) nextevent = this.psg.CountN
-        else nextevent = left
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! xxxx !!!!!!!!!!!!!!!!!!!!!!!!!! todo
-//left = 0 // todo: find why its not working !!!
+        if (this.psg.CountN < left) nextevent = this.psg.CountN;
+        else nextevent = left;
+
         if (outn & 0x08) {
-//console.log('stuck 2a...')
-          if (this.psg.OutputA) vola += this.psg.CountA
-          this.psg.CountA -= nextevent
+          if (this.psg.OutputA) vola += this.psg.CountA;
+          this.psg.CountA -= nextevent;
           /* PeriodA is the half period of the square wave. Here, in each */
           /* loop I add PeriodA twice, so that at the end of the loop the */
           /* square wave is in the same status (0 or 1) it was at the start. */
@@ -362,95 +358,87 @@ class VecxAudioProcessor extends AudioWorkletProcessor {
           /* If we exit the loop in the middle, OutputA has to be inverted */
           /* and vola incremented only if the exit status of the square */
           /* wave is 1. */
-          while (this.psg.CountA <= 0) {
-//console.log('stuck 3...')
-            this.psg.CountA += this.psg.PeriodA
+          while (this.psg.CountA <= 0 && this.psg.PeriodA > 0) {
+            this.psg.CountA += this.psg.PeriodA;
             if (this.psg.CountA > 0) {
-              this.psg.OutputA ^= 1
-              if (this.psg.OutputA) vola += this.psg.PeriodA
-              break
+              this.psg.OutputA ^= 1;
+              if (this.psg.OutputA) vola += this.psg.PeriodA;
+              break;
             }
-            this.psg.CountA += this.psg.PeriodA
-            vola += this.psg.PeriodA
+            this.psg.CountA += this.psg.PeriodA;
+            vola += this.psg.PeriodA;
           }
-          if (this.psg.OutputA) vola -= this.psg.CountA
+          if (this.psg.OutputA) vola -= this.psg.CountA;
         } else {
-console.log('stuck 2b...')
-
-          this.psg.CountA -= nextevent
-          while (this.psg.CountA <= 0) {
-//console.log('stuck 4...')
-            this.psg.CountA += this.psg.PeriodA
+          this.psg.CountA -= nextevent;
+          while (this.psg.CountA <= 0 && this.psg.PeriodA > 0) {
+            this.psg.CountA += this.psg.PeriodA;
             if (this.psg.CountA > 0) {
-              this.psg.OutputA ^= 1
-              break
+              this.psg.OutputA ^= 1;
+              break;
             }
-          this.psg.CountA += this.psg.PeriodA
+          this.psg.CountA += this.psg.PeriodA;
           }
         }
 
         if (outn & 0x10) {
-          if (this.psg.OutputB) volb += this.psg.CountB
-          this.psg.CountB -= nextevent
-          while (this.psg.CountB <= 0) {
-//console.log('stuck 5...')
-            this.psg.CountB += this.psg.PeriodB
+          if (this.psg.OutputB) volb += this.psg.CountB;
+          this.psg.CountB -= nextevent;
+          while (this.psg.CountB <= 0 && this.psg.PeriodB > 0) {
+			this.psg.CountB += this.psg.PeriodB;
             if (this.psg.CountB > 0) {
-              this.psg.OutputB ^= 1
-              if (this.psg.OutputB) volb += this.psg.PeriodB
-              break
+              this.psg.OutputB ^= 1;
+              if (this.psg.OutputB) volb += this.psg.PeriodB;
+              break;
             }
-            this.psg.CountB += this.psg.PeriodB
-            volb += this.psg.PeriodB
+            this.psg.CountB += this.psg.PeriodB;
+            volb += this.psg.PeriodB;
           }
-          if (this.psg.OutputB) volb -= this.psg.CountB
+          if (this.psg.OutputB) volb -= this.psg.CountB;
         } else {
-          this.psg.CountB -= nextevent
-          while (this.psg.CountB <= 0) {
-//console.log('stuck 6...')
-            this.psg.CountB += this.psg.PeriodB
+          this.psg.CountB -= nextevent;
+          while (this.psg.CountB <= 0 && this.psg.PeriodB > 0) {
+			this.psg.CountB += this.psg.PeriodB;
             if (this.psg.CountB > 0) {
-              this.psg.OutputB ^= 1
-              break
+              this.psg.OutputB ^= 1;
+              break;
             }
-            this.psg.CountB += this.psg.PeriodB
+            this.psg.CountB += this.psg.PeriodB;
           }
         }
 
         if (outn & 0x20) {
-          if (this.psg.OutputC) volc += this.psg.CountC
-          this.psg.CountC -= nextevent
-          while (this.psg.CountC <= 0) {
-//console.log('stuck 7...')
-            this.psg.CountC += this.psg.PeriodC
+          if (this.psg.OutputC) volc += this.psg.CountC;
+          this.psg.CountC -= nextevent;
+          while (this.psg.CountC <= 0 && this.psg.PeriodC > 0) {
+			this.psg.CountC += this.psg.PeriodC;
             if (this.psg.CountC > 0) {
-              this.psg.OutputC ^= 1
-              if (this.psg.OutputC) volc += this.psg.PeriodC
-              break
+              this.psg.OutputC ^= 1;
+              if (this.psg.OutputC) volc += this.psg.PeriodC;
+              break;
             }
-            this.psg.CountC += this.psg.PeriodC
-            volc += this.psg.PeriodC
+            this.psg.CountC += this.psg.PeriodC;
+            volc += this.psg.PeriodC;
           }
-          if (this.psg.OutputC) volc -= this.psg.CountC
+          if (this.psg.OutputC) volc -= this.psg.CountC;
         } else {
-          this.psg.CountC -= nextevent
-          while (this.psg.CountC <= 0) {
-//console.log('stuck 8...')
-            this.psg.CountC += this.psg.PeriodC
+          this.psg.CountC -= nextevent;
+          while (this.psg.CountC <= 0 && this.psg.PeriodC > 0) {
+            this.psg.CountC += this.psg.PeriodC;
             if (this.psg.CountC > 0) {
-              this.psg.OutputC ^= 1
-              break
+              this.psg.OutputC ^= 1;
+              break;
             }
-            this.psg.CountC += this.psg.PeriodC
+            this.psg.CountC += this.psg.PeriodC;
           }
         }
 
-        this.psg.CountN -= nextevent
+        this.psg.CountN -= nextevent;
         if (this.psg.CountN <= 0) {
           /* Is noise output going to change? */
           if ((this.psg.RNG + 1) & 2)	{/* (bit0^bit1)? */
-            this.psg.OutputN = (~this.psg.OutputN & 0xff) // raz
-            outn = (this.psg.OutputN | this.psg.Regs[AY_ENABLE])
+            this.psg.OutputN = (~this.psg.OutputN & 0xff); // raz
+            outn = (this.psg.OutputN | this.psg.Regs[AY_ENABLE]);
           }
 
           /* The Random Number Generator of the 8910 is a 17-bit shift */
@@ -463,63 +451,63 @@ console.log('stuck 2b...')
           /* register, what now is bit3 will become bit0, and will */
           /* invert, if necessary, bit14, which previously was bit17. */
           if (this.psg.RNG & 1) {
-            this.psg.RNG ^= 0x24000 /* This version is called the "Galois configuration". */
+            this.psg.RNG ^= 0x24000; /* This version is called the "Galois configuration". */
           }
-          this.psg.RNG >>= 1
-          this.psg.CountN += this.psg.PeriodN
+          this.psg.RNG >>= 1;
+          this.psg.CountN += this.psg.PeriodN;
         }
 
-        left -= nextevent
-      } while (left > 0)
+        left -= nextevent;
+	} while (left > 0 && nextevent > 0);
 
       /* update envelope */
       if (this.psg.Holding == 0) {
-        this.psg.CountE -= STEP
+        this.psg.CountE -= STEP;
         if (this.psg.CountE <= 0) {
           do {
-            this.psg.CountEnv--
-            this.psg.CountE += this.psg.PeriodE
-          } while (this.psg.CountE <= 0)
+            this.psg.CountEnv--;
+            this.psg.CountE += this.psg.PeriodE;
+		} while (this.psg.CountE <= 0 && this.psg.PeriodE>0);
 
           /* check envelope current position */
           if (this.psg.CountEnv < 0) {
             if (this.psg.Hold) {
               if (this.psg.Alternate)
-                this.psg.Attack ^= 0x1f
-              this.psg.Holding = 1
-              this.psg.CountEnv = 0
+                this.psg.Attack ^= 0x1f;
+              this.psg.Holding = 1;
+              this.psg.CountEnv = 0;
             } else {
               /* if CountEnv has looped an odd number of times (usually 1), */
               /* invert the output. */
               if (this.psg.Alternate && (this.psg.CountEnv & 0x20))
-                this.psg.Attack ^= 0x1f
+                this.psg.Attack ^= 0x1f;
 
-              this.psg.CountEnv &= 0x1f
+              this.psg.CountEnv &= 0x1f;
             }
           }
 
-          this.psg.VolE = this.psg.VolTable[this.psg.CountEnv ^ this.psg.Attack]
+          this.psg.VolE = this.psg.VolTable[this.psg.CountEnv ^ this.psg.Attack];
           /* reload volume */
-          if (this.psg.EnvelopeA) this.psg.VolA = this.psg.VolE
-          if (this.psg.EnvelopeB) this.psg.VolB = this.psg.VolE
-          if (this.psg.EnvelopeC) this.psg.VolC = this.psg.VolE
+          if (this.psg.EnvelopeA) this.psg.VolA = this.psg.VolE;
+          if (this.psg.EnvelopeB) this.psg.VolB = this.psg.VolE;
+          if (this.psg.EnvelopeC) this.psg.VolC = this.psg.VolE;
         }
       }
 
-      this.psg.AnaA = vola * this.psg.VolA
-      this.psg.AnaB = volb * this.psg.VolB
-      this.psg.AnaC = volc * this.psg.VolC
+      this.psg.AnaA = vola * this.psg.VolA;
+      this.psg.AnaB = volb * this.psg.VolB;
+      this.psg.AnaC = volc * this.psg.VolC;
 
-      vol = (vola * this.psg.VolA + volb * this.psg.VolB + volc * this.psg.VolC) / (3 * STEP)
+      vol = (vola * this.psg.VolA + volb * this.psg.VolB + volc * this.psg.VolC) / (3 * STEP);
       if (--length & 1) {
-        var val = vol / MAX_OUTPUT
-        stream[idx++] = val
+        var val = vol / MAX_OUTPUT;
+        stream[idx++] = val;
       }
     }
   }
 
   handleMessage_(event) {
-    console.log('[Processor:Received]', event.data.msg)
+    //console.log('[Processor:Received]', event.data.msg)
     switch (event.data.msg) {
       case 'init':
         this.init()

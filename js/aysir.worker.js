@@ -13,12 +13,23 @@ import {VTXReader} from './reader/vtx.js'
 let song, dest, sampleRate, msgStack = [], timer
 
 onmessage = function(e) {
-  switch (e.data.msg) {
+	switch (e.data.msg) {
     case undefined: // transfer of the worklet.node.port
-      dest = e.data
-      dest.onmessage = (e) => {
-        console.warn('Worker got from Backend', e) // this should not be in use
-      }
+      if (e.data.dest) {
+				// transfer of comm obj
+				dest = e.data.dest
+				// here in msgport transfer i also set the onmessage event
+				dest.onmessage = (e) => {
+					if (e.data.channels) {
+						if (e.data.channels[0].length>0) {
+							//console.log(e.data.channels)
+
+						}
+						return
+					}
+					console.warn('Worker got from Backend', e.data) // this should not be in use
+				}
+			}
       //postMessage({msg:'thanks for transfer'})
       break
     case 'stop': // not used
@@ -96,6 +107,7 @@ function waitTillReady(cnt) {
 }
 function startLoop() {
   stop()
+  msg('start')
   // fill buffer
   timer = setInterval(()=>{
     msg('regs', song.getNextFrame()) // to worklet

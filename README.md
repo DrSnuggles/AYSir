@@ -14,6 +14,9 @@ about:config
 	gfx.offscreencanvas.enabled
 
 ## Not sure what will happen here
+13.11.2021:
+- Added Vecx backend
+
 17.10.2021:
 - Songs from modland 5759 (.ym, .vtx)
 - Songs from MccM 8807 (.fym) (needed proxy to pass CORS)

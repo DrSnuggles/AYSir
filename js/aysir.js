@@ -56,7 +56,7 @@ worker.onmessage = (e) => {
 function initWorker() {
   if (node.port){
     //console.log('want to transfer')
-    worker.postMessage(node.port, [node.port])
+    worker.postMessage({dest: node.port}, [node.port])
   }
   worker.postMessage({msg:'init', a:{
     sampleRate: ctx.sampleRate,
@@ -285,7 +285,8 @@ function fillMmcm(cb) {
     const k = Object.keys(j)
     const html = []
     let l = 0
-    const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
+    //const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
+    const urlStart = 'https://static.0.169.99.88.clients.your-server.de:8080?https://ym.mmcm.ru/chiptunes/'
     html.push(`<optgroup label="MccM's FYM archive">`)
     for (let i = 0; i < k.length; i++) {
       if (k[i].indexOf(' ') === -1) {
