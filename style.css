@@ -1,0 +1,49 @@
+body {
+	font: 100% sans-serif;
+	background: linear-gradient(45deg, #aaa, transparent);
+	height: 100vh;
+	overflow: hidden;
+}
+div {
+	text-align: center;
+}
+[onclick],
+[oninput]{
+	cursor: pointer;
+}
+span[onclick] {
+	padding: 2px;
+	border: 1px solid transparent;
+}
+span[onclick]:hover {
+	border: 1px solid #000;
+	background: #DDD;
+}
+input[type=range] {
+	width: 100%;
+}
+#songSel {
+	width: calc(100vw - 20px);
+	height: calc(100vh - 110px);
+}
+#myViz {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: min(30vw, 30vh);
+	height: min(30vw, 30vh);
+	background: #000;
+	opacity: 0;
+	transition: opacity 0.4s ease-in-out;
+}
+#myViz.fadeIn {
+	opacity: 1;
+}
+#infoTxt {
+	display: inline-block;
+	width: calc(100vw - 220px);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font: 100% monospace;
+}

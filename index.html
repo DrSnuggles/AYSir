@@ -1,47 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="description" content="AY Sir"/>
-  <title>AY Sir</title>
-  <style>
-    div {
-      text-align: center;
-    }
-    [onclick],
-    [oninput]{
-      cursor: pointer;
-    }
-    #myViz {
-      width: min(50vw, 50vh);
-      height: min(50vw, 50vh);
-      background: #000;
-    }
-  </style>
-  <script src="./js/aysir.js" type="module"></script>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta name="description" content="AY Sir"/>
+	<title>AY Sir</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>📻</text></svg>">
+	<link rel="stylesheet" href="./style.css">
+	<script src="../kkRows/js/kk-rows.js" type="module"></script>
+	<script src="./js/aysir.js" type="module"></script>
 </head>
 <body>
-  🎼<select id="songSel" onchange="AYSir.playURL(this.value)"><option>Please choose a song or click slot machine</option></select>
-  ⚙️<select id="EngineSel" onchange="AYSir.setEngine(this.value)">
-    <option value="ayumi">Ayumi</option>
-    <option value="gasman">Demozoo</option>
-    <option value="vecx">Vecx</option>
-    <!--
-    <option value="nonameno">CODEF (does not exist yet)</option>
-    -->
-  </select>
+	<table>
+		<colgroup>
+			<col width="1%">
+			<col width="98%">
+			<col width="1%">
+		</colgroup>
+		<tr> <!-- control -->
+			<td style="white-space:nowrap;">
+				<span onclick="AYSir.loadAndPlayNextSong()" title="Play random song">🎰</span>
+				<span onclick="myViz.classList.toggle('fadeIn')" title="Toggle Visualizer">ᨓ</span>
+			</td>
+			<td colspan="2">
+				<span title="Choose your engine :)">
+					⚙️<select id="EngineSel" onchange="AYSir.setEngine(this.value)">
+						<option value="ayumi">Ayumi</option>
+						<option value="gasman">Demozoo</option>
+						<option value="vecx">Vecx</option>
+						<!-- <option value="nonameno">CODEF (does not exist yet)</option> -->
+					</select>
+				</span>
+				🎼<span id="infoTxt"></span> <!-- 🎵 🎶 -->
+			</td>
+		</tr>
+		<tr> <!-- volume -->
+			<td><span onclick="AYSir.setGain(0);volume.value=0">🔈</span></td>
+			<td><input id="volume" oninput="AYSir.setGain(this.value)" type="range" min="0.0" max="1.0" value="0.25" step="0.0001"></td>
+			<td><span onclick="AYSir.setGain(1);volume.value=1">🔊</span></td>
+		</tr>
+		<tr> <!-- position -->
+			<td>00:00</td>
+			<td><input id="position" oninput="AYSir.setPos(this.value)" type="range" min="0.0" max="1.0" value="0" step="0.0001"></td>
+			<td><span id="songLen">00:00</span></td>
+		</tr>
+		<tr> <!-- list -->
+			<td colspan="3"><kk-rows id="songSel" cb="AYSir.playURL" hide="0" head="Author|Song|Format|Archive"></kk-rows></td>
+		</tr>
+	</table>
 
-  <div onclick="AYSir.loadAndPlayNextSong()" style="font-size:300%" title="Play random song">👉🎰👈</div>
-  
-  <div><span onclick="AYSir.setGain(0);volume.value=0">🔈</span><input id="volume" oninput="AYSir.setGain(this.value)" type="range" min="0.0" max="1.0" value="0.25" step="0.0001" style="width: 80vw;"><span onclick="AYSir.setGain(1);volume.value=1">🔊</span></div>
-  <div>00:00<input id="position" oninput="AYSir.setPos(this.value)" type="range" min="0.0" max="1.0" value="0" step="0.0001" style="width: 80vw;"><span id="songLen">00:00</span></div>
+	<canvas id="myViz" width="500" height="500"></canvas> <!-- abs positioned visualizer -->
 
-  <h1 id="trackName"></h1>
-  <h2 id="authorName"></h2>
-  <h3 id="commentName"></h3>
-  
-  <canvas id="myViz" width="500" height="500"></canvas>
-  
 </body>
 </html>

@@ -55,7 +55,7 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 ## Engines
 + AYUMI (compact code)
 + Gasman / Cowbell Demozoo (also had some format readers and a changed Lh4 lib, i put both lh4 libs together and made class)
-- jsVecx Engine
++ jsVecx Engine
 - CODEF / Phaser Antoine Santo Aka NoNameNo, Nicolas CHALLEIL Aka STuFF
 
 ## Links

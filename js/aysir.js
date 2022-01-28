@@ -34,10 +34,7 @@ worker.onmessage = (e) => {
       break
     case 'song':
       song = e.data.song
-      //console.log(song)
-      trackName.innerText = song.title
-      authorName.innerText = song.author
-      commentName.innerText = song.comment ? song.comment : ''
+	  infoTxt.innerText = song.author +' - '+ song.title + (song.comment ? ' ('+ song.comment  +')': '')
       // calc time
       const time = Math.ceil(((song.frameCount) ? song.frameCount : song.frames.length) / song.rate) // secs rounded up
       let mm = Math.floor(time/60)
@@ -250,32 +247,7 @@ addHandler.forEach((e) => {
 // get some songs
 //
 let songs = []
-// ES6 shuffle: https://gist.github.com/guilhermepontes/17ae0cc71fa2b13ea8c20c94c5c35dc4#gistcomment-2271465
-//let songs = [/*'songs/FYM/01_scalesmannmisfire.fym','songs/VTX/Gasman - Delta (2001).vtx','songs/VTX/JeRrS - Ostrowok (2006).vtx','songs/PSG/n1k-o, TmK - lost madness (2018) (DiHalt Lite 2018, 2).psg','songs/PSG/TmK - Some Small CompoFiller (2017) (Chaos Constructions 2017, 7).psg','songs/AY/COMMANDO.ay','songs/FYM/0ffsprin.fym','songs/nq - Hara mamba scene (2019).pt3','songs/YM/delta.ym'*/]
-//songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
-
-//
-// own FYM ch6 list
-// songs/FYM/6ch
-// todo: add 6ch support
-//
-/*
-const fym6ch = ['Alone Coder/gostiits','Black Fox/autumn','Ch41ns4w/afrox','Ch41ns4w/chebo','Ch41ns4w/dot','Ch41ns4w/drwilly','Ch41ns4w/phantasy','Ch41ns4w/ssss','Ch41ns4w/test2_2','Ch41ns4w/wannaf','Ch41ns4w/zalzachipi_1','Darkman007/technodrive','Darkman007/turbo','Dj Denson/d-omen','Dj Denson/pinkvis','Factor6/factor6 - cover of _hung up_ by madonna (2xay acb)','John/webberts','Karbofos/bananacucumber','Karbofos/dncdick','Karbofos/funkyenvelopes','Karbofos/goddy','Karbofos/insane','Karbofos/kk','Karbofos/krwrk','Karbofos/lgwbyb','Karbofos/minik','Karbofos/nm','Karbofos/nopower2','Karbofos/over','Karbofos/raketa','Karbofos/s2a','Karbofos/trotil','Karbofos/turbodance','Nik-O/kaukas','Nik-O/qbical','Riskej/moveur','Riskej/p_apostl','Riskej/sayyeahi','Scalesmann/onestp','Scalesmann/panic','Scalesmann/zaris','Shiru Otaku/ballquest1','Shiru Otaku/ballquest2','Shiru Otaku/ballquest3','Shiru Otaku/ballquest4','Shiru Otaku/ballquest5','Shiru Otaku/ballquest6','Shiru Otaku/ballquest8','Shiru Otaku/kirby_ts','Shiru Otaku/smr_ents','Shiru Otaku/smvenuts','Splinter/crazzyhouse','Splinter/domen','Splinter/illberemember','Splinter/ineedrest','Splinter/mermaid','Splinter/night','Splinter/nowtrance','Splinter/pinkvision','Splinter/pulsar','Splinter/stars','Splinter/wind','Splinter/wwf','Voxel/long_day','X-agon/x-agon_of_phantasy-breath-of-air-6chan-mod']
-let html = []
-html.push('<optgroup label="6ch FYM">')
-fym6ch.forEach(e => {
-  html.push(`<option value="FYM/6ch/${e}.fym">${e}</option>`)
-  //songs.push(`songs/FYM/6ch/${e}.fym`) // not working yet
-})
-html.push('</optgroup')
-songSel.insertAdjacentHTML('beforeEnd',html.join(''))
-*/
-songSel.onclick = function(ev) {
-  ev.preventDefault()
-}
-
 fillMmcm(fillModland)
-//fillModland()
 
 function fillMmcm(cb) {
   console.time('process mmcm list')
@@ -283,51 +255,42 @@ function fillMmcm(cb) {
   .then(r => r.json())
   .then(j => {
     const k = Object.keys(j)
-    const html = []
+    const data = []
     let l = 0
-    //const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
-    const urlStart = 'https://static.0.169.99.88.clients.your-server.de:8080?https://ym.mmcm.ru/chiptunes/'
-    html.push(`<optgroup label="MccM's FYM archive">`)
+    const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
     for (let i = 0; i < k.length; i++) {
       if (k[i].indexOf(' ') === -1) {
-        html.push(`<optgroup label="${k[i]}">`)
         for (let e = 0; e < j[k[i]].length; e++) {
           if (j[k[i]][e].indexOf(' ') === -1) {
             const url = urlStart + k[i] +'/'+ j[k[i]][e]
-            html.push(`<option value="${url}">${j[k[i]][e]}</option>`)
             songs.push(url)
+			data.push( [url, k[i], j[k[i]][e].substr(0, j[k[i]][e].lastIndexOf('.')), 'FYM', 'MccM' ] )
             l++
           } // space inside songname
         }
-        html.push(`</optgroup>`)
       } // space inside musician
     }
-    html.push(`</optgroup>`)
-    songSel.insertAdjacentHTML('beforeEnd',html.join(''))
-
     console.timeEnd('process mmcm list')
     console.log('MmcM songlist contains: ', l)
 
     //
     // callback
     //
-    cb()
+    cb(data)
     
   })
   .catch(e=>console.error(e))
   
 }
 
-function fillModland() {
+function fillModland(data) {
   console.time('process modland list')
   fetch('modland.txt')
   .then(r => r.text())
   .then(t => t.split('\n'))
   .then(a => {
-    const html = []
     let l = 0
     let lastAuthor = ''
-    html.push(`<optgroup label="Modland VTX/YM archive">`)
     for (let i = 0; i < a.length; i++) {
       const entry = a[i].split('\t')[1]
       if (!entry) continue // skip blank lines (last)
@@ -341,21 +304,16 @@ function fillModland() {
         const url = 'https://ftp.modland.com/pub/modules/' + entry
         const authorChange = (lastAuthor !== author)
         if (authorChange) {
-          if (lastAuthor !== '') html.push(`</optgroup>`)
-          html.push(`<optgroup label="${author}">`)
           lastAuthor = author
         }
-        html.push(`<option value="${url}">${title}</option>`)
 
         songs.push(url)
+		const ext = title.substr(title.lastIndexOf('.')+1).toUpperCase()
+		data.push( [url, author, title.substr(0, title.lastIndexOf('.')), ext, 'Modland'] )
         l++
       }
     }
-    html.push(`</optgroup>`)
-    html.push(`</optgroup>`)
-
-    //console.log(a)
-    songSel.insertAdjacentHTML('beforeEnd',html.join(''))
+	songSel.setAttribute('data', JSON.stringify(data) )
 
     songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
 
@@ -377,7 +335,9 @@ function fillModland() {
 //
 window.AYSir = {
   loadAndPlayNextSong: loadAndPlayNextSong,
-  playURL: playURL,
+  playURL: (el) => {
+	  playURL( el.querySelector('td').innerText )
+  },
   setGain: setGain,
   setEngine: setEngine,
   setPos: setPos,
