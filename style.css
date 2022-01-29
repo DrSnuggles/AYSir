@@ -47,3 +47,25 @@ input[type=range] {
 	text-overflow: ellipsis;
 	font: 100% monospace;
 }
+#audioModal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: #FFFD;
+	font: 500% sans-serif;
+	line-height: 100vh;
+}
+#audioModal.fadeOut {
+    animation: fadeOut 500ms forwards;
+}
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+	100% {
+        opacity: 0;
+        z-index: -604;
+    }
+}

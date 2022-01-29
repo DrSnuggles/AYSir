@@ -96,6 +96,11 @@ async function setEngine(eng) {
   // now reinit the whole audio ctx incl. worklet
   ctx = new AudioContext(/*{sampleRate: 27344}*/) // 22050 is bit too low
   console.log(ctx)
+
+  if (ctx.state == 'running') {
+	audioModal.classList.add('fadeOut')
+  }
+
   await ctx.audioWorklet.addModule(`./js/backend/${eng}.js`)
   node = new AudioWorkletNode(ctx, `${eng}-audio-processor`, {
     numberOfInputs: 0,
@@ -145,7 +150,12 @@ async function setEngine(eng) {
   rAF = requestAnimationFrame(analLoop)
   
   // stupid no audio till user interaction policy thingy
-  function resume(){if (ctx.state !== 'running') ctx.resume()}
+  function resume() {
+	if (ctx.state !== 'running') {
+		ctx.resume()
+		audioModal.classList.add('fadeOut')
+	}
+  }
   addEventListener('keydown', resume)
   addEventListener('click', resume)
   addEventListener('touchstart', resume)
@@ -324,7 +334,7 @@ function fillModland(data) {
     // start the show, emm audio
     //
     loadAndPlayNextSong()
-    
+
   })
   .catch(e=>console.error(e))
   
