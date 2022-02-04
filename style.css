@@ -35,9 +35,11 @@ input[type=range] {
 	background: #000;
 	opacity: 0;
 	transition: opacity 0.4s ease-in-out;
+	z-index: -1;
 }
 #myViz.fadeIn {
 	opacity: 1;
+	z-index: 1;
 }
 #infoTxt {
 	display: inline-block;

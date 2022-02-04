@@ -345,8 +345,8 @@ function fillModland(data) {
 //
 window.AYSir = {
   loadAndPlayNextSong: loadAndPlayNextSong,
-  playURL: (el) => {
-	  playURL( el.querySelector('td').innerText )
+  playURL: (j) => {
+	  playURL( j[0] )
   },
   setGain: setGain,
   setEngine: setEngine,
