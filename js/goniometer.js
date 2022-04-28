@@ -1,19 +1,19 @@
 /*
-  Worker vor OffscreenCanvas
+  Worker for OffscreenCanvas
 */
 
 let canv, ctx, width, height, dataL, dataR
 
 onmessage = function(e) {
   // most on top
-  if (e.data.dataL) {
+  if (e.data.data) {
     // draw
-    dataL = e.data.dataL
-    dataR = e.data.dataR
+    dataL = e.data.data[0]
+    dataR = e.data.data[1]
 
-    clearGoniometer()
-    drawBGlines()
-    drawGoniometer()
+    clear()
+    drawBG()
+    drawFG()
     
     return
   }
@@ -30,13 +30,13 @@ onmessage = function(e) {
   console.error('Unknown message:', e.data)
 }
 
-function clearGoniometer() {
+function clear() {
   // clear/fade out old
   ctx.fillStyle = 'rgba(0, 0, 0, 255)'
   ctx.fillRect(0, 0, width, height)
 }
 
-function drawBGlines() {
+function drawBG() {
   ctx.lineWidth = 1
   ctx.strokeStyle = 'rgba(30, 200, 10, 255)'
   ctx.beginPath()
@@ -73,7 +73,7 @@ function drawBGlines() {
   ctx.stroke() // finally draw
 }
 
-function drawGoniometer() {
+function drawFG() {
   ctx.lineWidth = 1
   ctx.strokeStyle = 'rgba(30, 200, 10, 255)'
   ctx.beginPath()
