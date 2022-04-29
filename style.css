@@ -43,7 +43,7 @@ input[type=range] {
 }
 #infoTxt {
 	display: inline-block;
-	width: calc(100vw - 220px);
+	width: calc(100vw - 260px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

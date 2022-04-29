@@ -66,7 +66,8 @@ function initWorker() {
 // ToDo: initiate on open and different types...
 const offscreen = document.querySelector('#myViz').transferControlToOffscreen()
 //const canvasWorker = new Worker('./js/goniometer.js', {type: 'module'})
-const canvasWorker = new Worker('./js/spectrogram.js', {type: 'module'})
+//const canvasWorker = new Worker('./js/spectogram.js', {type: 'module'})
+const canvasWorker = new Worker('./js/canvas.worker.js', {type: 'module'})
 canvasWorker.postMessage({ canvas: offscreen }, [offscreen]) // its nicer to pack the transfered objects into a new one
 
 //
@@ -134,28 +135,30 @@ async function setEngine(eng) {
 	left.pan.value = -1.0
 	right.pan.value = 1.0
 	*/
-	const analyserNodeCnt = 1 // 1=single stereo analyzer, 2=2x mono
 	const analyserNodes = []
-	for (let i = 0; i < analyserNodeCnt; i++) {
+	for (let i = 0, e = ctx.destination.channelCount; i < e; i++) { // all channels the ctx has
 		analyserNodes[i] = ctx.createAnalyser()
+		analyserNodes[i].fftSize = 2048 // 2^5 .. 2^15 (32..32768) default 2048
 		node.connect(analyserNodes[i], i, 0) // pick correct input channel
 	}
 	function analLoop() {
 		rAF = requestAnimationFrame(analLoop)  
 
 		const data = []
-		for (let i = 0; i < analyserNodeCnt; i++) {
-			// ToDo: make domain variable
-			if (1 == 1) {
-				data[i] = new Uint8Array(analyserNodes[i].frequencyBinCount)
-				analyserNodes[i].getByteFrequencyData(data[i])
-			} else {
+		// TimeDomain or Frequency
+		if (actViz == 1) {
+			for (let i = 0; i < analyserNodes.length; i++) {
 				data[i] = new Float32Array(analyserNodes[i].frequencyBinCount)
 				analyserNodes[i].getFloatTimeDomainData(data[i])
 			}
-			analyserNodes[i].fftSize = 2048 // 2^5 .. 2^15 (32..32768) default 2048
+		} else if (actViz == 2) {
+			for (let i = 0; i < analyserNodes.length; i++) {
+				data[i] = new Uint8Array(analyserNodes[i].frequencyBinCount)
+				analyserNodes[i].getByteFrequencyData(data[i])
+			}
 		}
-		canvasWorker.postMessage({data: data})
+
+		if (actViz !== 0) canvasWorker.postMessage({viz: actViz, data: data})
 	}
 
 	if (rAF) {
@@ -169,6 +172,7 @@ async function setEngine(eng) {
 		maxDB: analyserNodes[0].maxDecibels,
 		smooth: analyserNodes[0].smoothingTimeConstant,
 		sampleRate: ctx.sampleRate,
+		channels: ctx.destination.channelCount,
 	})
 
 	rAF = requestAnimationFrame(analLoop)
@@ -293,16 +297,13 @@ function fillMmcm(cb) {
 		let l = 0
 		const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
 		for (let i = 0; i < k.length; i++) {
-			if (k[i].indexOf(' ') === -1) {
-				for (let e = 0; e < j[k[i]].length; e++) {
-					if (j[k[i]][e].indexOf(' ') === -1) {
-						const url = urlStart + k[i] +'/'+ j[k[i]][e]
-						songs.push(url)
-			data.push( [url, k[i], j[k[i]][e].substr(0, j[k[i]][e].lastIndexOf('.')), 'FYM', 'MccM' ] )
-						l++
-					} // space inside songname
-				}
-			} // space inside musician
+			for (let e = 0; e < j[k[i]].length; e++) {
+				let url = urlStart + k[i] +'/'+ j[k[i]][e]
+				url = url.replace(/ /g,'%20')
+				songs.push(url)
+				data.push( [url, k[i], j[k[i]][e].substr(0, j[k[i]][e].lastIndexOf('.')), 'FYM', 'MccM' ] )
+				l++
+			}
 		}
 		console.timeEnd('process mmcm list')
 		console.log('MmcM songlist contains: ', l)
@@ -347,7 +348,7 @@ function fillModland(data) {
 				l++
 			}
 		}
-	songSel.setAttribute('data', JSON.stringify(data) )
+		songSel.setAttribute('data', JSON.stringify(data) )
 
 		songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
 
@@ -363,6 +364,13 @@ function fillModland(data) {
 	.catch(e=>console.error(e))
 	
 }
+let actViz = 0 // 0 = off, 1 = Goniometer, 2 = Spectogram
+function toggleViz() {
+	actViz++
+	if (actViz > 2) actViz = 0
+	if (actViz === 0) myViz.classList.remove('fadeIn')
+	if (actViz > 0) myViz.classList.add('fadeIn')
+}
 
 //
 // set globals for external (HTML/UI) use
@@ -375,6 +383,7 @@ window.AYSir = {
 	setGain: setGain,
 	setEngine: setEngine,
 	setPos: setPos,
+	toggleViz: toggleViz,
 }
 
 //
@@ -382,12 +391,12 @@ window.AYSir = {
 //
 /* getFloatTimeDomainData polyfill for Safari
 if (global.AnalyserNode && !global.AnalyserNode.prototype.getFloatTimeDomainData) {
-  var uint8 = new Uint8Array(32768);
-  global.AnalyserNode.prototype.getFloatTimeDomainData = function(array) {
-    this.getByteTimeDomainData(uint8);
-    for (var i = 0, imax = array.length; i < imax; i++) {
-      array[i] = (uint8[i] - 128) * 0.0078125;
-    }
-  };
+	var uint8 = new Uint8Array(32768);
+	global.AnalyserNode.prototype.getFloatTimeDomainData = function(array) {
+		this.getByteTimeDomainData(uint8);
+		for (var i = 0, imax = array.length; i < imax; i++) {
+			array[i] = (uint8[i] - 128) * 0.0078125;
+		}
+	};
 }
 */

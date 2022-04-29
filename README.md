@@ -1,19 +1,25 @@
 # AYSIR
 AY Player
 
-Maybe rename to YAMY (yummi), MAYY (may why), YMAY (why may), AMYY (amy why)
+## Why
+Sir Sinclair died 2 days ago and i also have to fix a problem with zipped AY thingy in jsVecx
 
 ToDo:
 - Random on/off
 - Save last index to localStorage
-- Add Norbert Kehrer's soundtrakker_player
+- Add Norbert Kehrer's soundtrakker_player ST1
+- PT3 (2, 1)
 
-## Maybe helpful Firefox config changes
-about:config
-	dom.moduleScripts.enabled
-	gfx.offscreencanvas.enabled
+## History | Not sure what will happen here
+29.04.2022:
+- Multiple vizualizers (actually Goniometer, Spectogram)
 
-## Not sure what will happen here
+29.04.2022:
+- Bugfix: Space in URL (now 14566 songs)
+
+25.04.2022:
+- Added Spectrogram
+
 13.11.2021:
 - Added Vecx backend
 
@@ -22,6 +28,7 @@ about:config
 - Songs from MccM 8807 (.fym) (needed proxy to pass CORS)
 
 11.10.2021: Put old goniometer in a OffscreenCanvas worker, done
+
 11.10.2021: Quickly hooked up my old goniometer, maybe add an output channel for each A,B,C-channel
 
 11.10.2021: Found out that with worklets it's a bit different to access the 2nd channel. So i had to rework the backends a bit to support 2 outputs, still not channels but at least accessible for the analyzer node.
@@ -36,8 +43,6 @@ about:config
 
 22.09.2021: some progress was made. already 2 backends but frontend is blocking pusher since all comm is done through main thread
 1 or 2 backends more and i should have a nice backend suite.
-
-Sir Sinclair died 2 days ago and i also have to fix a problem with zipped AY thingy in jsVecx
 
 ## Goal
 Make Worker script that fills AudioWorklet
@@ -57,6 +62,11 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 + Gasman / Cowbell Demozoo (also had some format readers and a changed Lh4 lib, i put both lh4 libs together and made class)
 + jsVecx Engine
 - CODEF / Phaser Antoine Santo Aka NoNameNo, Nicolas CHALLEIL Aka STuFF
+
+## Maybe helpful Firefox config changes
+- about:config
+- dom.moduleScripts.enabled
+- gfx.offscreencanvas.enabled
 
 ## Links
 https://bulba.untergrund.net/progr_e.htm
