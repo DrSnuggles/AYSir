@@ -2,7 +2,6 @@
 	by DrSnuggles
 	based on infos found:
 		https://documentation.help/AY-3-8910.12-ZX-Spectrum/ay_e099f.htm
-		https://github.com/norbertkehrer/soundtrakker_player
 */
 export class STCReader {
 

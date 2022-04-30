@@ -7,14 +7,16 @@ Sir Sinclair died 2 days ago and i also have to fix a problem with zipped AY thi
 ToDo:
 - Random on/off
 - Save last index to localStorage
-- Add Norbert Kehrer's soundtrakker_player ST1
+- TS (6ch) support
 - PT3 (2, 1)
 
 ## History | Not sure what will happen here
-29.04.2022:
-- Multiple vizualizers (actually Goniometer, Spectogram)
+30.04.2022:
+- Bugfix: Typo in BSCReader
 
 29.04.2022:
+- Added Norbert Kehrer's BSC Soundtrakker for .128 files (+309 songs from Norberts archive) (i siply set them all to .128 but most should be .SNG 1.x format)
+- Multiple vizualizers (actually Goniometer, Spectogram)
 - Bugfix: Space in URL (now 14566 songs)
 
 25.04.2022:
@@ -69,30 +71,26 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 - gfx.offscreencanvas.enabled
 
 ## Links
-https://bulba.untergrund.net/progr_e.htm
-https://documentation.help/AY-3-8910.12-ZX-Spectrum/ay_e0qjz.htm
+- https://bulba.untergrund.net/progr_e.htm
+- https://documentation.help/AY-3-8910.12-ZX-Spectrum/ay_e0qjz.htm
+- https://ym.mmcm.ru/
+- https://zxtunes.com/
+- http://sndh.atari.org/
+- http://aygor.abrimaal.pro-e.pl/
+- https://github.com/Abrimaal/AY-Format-Development
+- https://www.fenarinarsa.com/?p=1454
+- https://github.com/ESPboy-edu/ESPboy_PT3Play
+- https://github.com/ESPboy-edu/ESPboy_PT3Play/blob/master/PT3Play.h
+- https://github.com/deater/vmw-meter/blob/master/pi-chiptune/arm32/pt3_lib.c
+- http://www.julien-nevo.com/arkostracker/
+- https://bitbucket.org/zxtune/zxtune/src/develop/src/formats
+- http://leonard.oxg.free.fr/
 
-
-https://github.com/norbertkehrer/soundtrakker_player
-
-https://ym.mmcm.ru/
-
-https://zxtunes.com/
-http://sndh.atari.org/
-http://aygor.abrimaal.pro-e.pl/
-https://github.com/Abrimaal/AY-Format-Development
-
-https://www.fenarinarsa.com/?p=1454
-https://github.com/ESPboy-edu/ESPboy_PT3Play
-https://github.com/ESPboy-edu/ESPboy_PT3Play/blob/master/PT3Play.h
-https://github.com/deater/vmw-meter/blob/master/pi-chiptune/arm32/pt3_lib.c
-
-http://www.julien-nevo.com/arkostracker/
-
-https://bitbucket.org/zxtune/zxtune/src/develop/src/formats
-
-http://leonard.oxg.free.fr/
-https://www.fenarinarsa.com/?p=1454
+### Soundtrakker
+- https://github.com/norbertkehrer/soundtrakker_player
+- https://www.cpcwiki.eu/index.php/File:Soundtrakker_goodies.rar
+- https://www.grimware.org/doku.php/documentations/software/soundtrakker/start
+- https://www.grimware.org/doku.php/documentations/software/soundtrakker/dev.fileformat.128
 
 
 ## Formats https://bulba.untergrund.net/emulator_e.htm
@@ -125,7 +123,7 @@ https://www.fenarinarsa.com/?p=1454
 	- AKS - Arkos Tracker 1+2 3/9ch/unlimited channels + digidrums
 	- SKS - STarKos Tracker
 	- VT2 - Vortex Tracker 2
-	- 128 - BSC's Soundtrakker
+	+ 128 - BSC's Soundtrakker (https://github.com/norbertkehrer/soundtrakker_player)
 	- Wyz - Wyz Tracker
 	- CHP - Chip'n'sfx
 5. Format list from zxart.ee:
@@ -150,7 +148,7 @@ https://www.fenarinarsa.com/?p=1454
 	- PT3 - Pro Tracker v3.x / Vortex Tracker II v1.0 (8869 songs)
 	- SQD - SQ Digital Tracker
 	- SQT - SQ-Tracker Compiled (https://zxart.ee/eng/authors/x/x-agon/warhawk-atari800rob-hubbard/)
-	- ST1 - Sound Tracker v1.x (13 songs) (https://github.com/norbertkehrer/soundtrakker_player)
+	- ST1 - Sound Tracker v1.x (13 songs)
 	- ST3 - Sound Tracker v3.x Compiled
 	- STC - SONG BY ST COMPILE - Sound Tracker v1.x (2276 songs)
 	- STP - Sound Tracker Pro v1.x

@@ -193,8 +193,8 @@ async function setEngine(eng) {
 
 }
 function setPos(pos) { // todo: rethink this 0..1 float, could also be frame of frameCount
-	
-	const jumpTo = Math.floor(((song.frames.length) ? song.frames.length : song.frameCount) * pos)
+	//const jumpTo = Math.floor(((song.frames.length) ? song.frames.length : song.frameCount) * pos)
+	const jumpTo = Math.floor(song.frameCount * pos)
 	worker.postMessage({msg:'jump', a:jumpTo})
 }
 
@@ -218,6 +218,7 @@ function playURL(url) {
 		//60, 33, 68, 79, 67, 84, 89, 80,
 		// this means a URL encoding prob in CORS worker !! ToDo in other project, but should be handled
 		if (b[0] === 60 && b[1] === 33 && b[2] === 68 && b[3] === 79) throw 'Got HTML content not a data buffer'
+		
 		worker.postMessage({msg:'buf', ext: url.substr(-3).toLowerCase(), buf:b})
 		isLoading = false
 	})
@@ -284,16 +285,43 @@ addHandler.forEach((e) => {
 //
 // get some songs
 //
-let songs = []
-fillMmcm(fillModland)
+let songs = [], data = []
+fillNK()
+function fillNK() {
+	console.time('process NK list')
+	fetch('./lists/NK.json')
+	.then(r => r.json())
+	.then(j => {
+		const k = j
+		let l = 0
+		const urlStart = './songs/NK/'
+		for (let i = 0; i < k.length; i++) {
+			let url = urlStart + k[i] +'.128'
+			//url = url.replace(/ /g,'%20')
+			songs.push(url)
+			data.push( [url, 'unknown', k[i], 'BSC', 'Norbert Kehrer' ] )
+			l++
+		}
+		console.timeEnd('process NK list')
+		console.log('NK songlist contains: ', l)
 
-function fillMmcm(cb) {
+		//
+		// callback
+		//
+		//songSel.setAttribute('data', JSON.stringify(data) )
+		//loadAndPlayNextSong()
+		fillMmcm()
+		
+	})
+	.catch(e=>console.error(e))
+	
+}
+function fillMmcm() {
 	console.time('process mmcm list')
-	fetch('mmcm.json')
+	fetch('./lists/mmcm.json')
 	.then(r => r.json())
 	.then(j => {
 		const k = Object.keys(j)
-		const data = []
 		let l = 0
 		const urlStart = 'https://simpleproxy.drsnuggles.workers.dev?https://ym.mmcm.ru/chiptunes/'
 		for (let i = 0; i < k.length; i++) {
@@ -311,16 +339,15 @@ function fillMmcm(cb) {
 		//
 		// callback
 		//
-		cb(data)
+		fillModland()
 		
 	})
 	.catch(e=>console.error(e))
 	
 }
-
-function fillModland(data) {
+function fillModland() {
 	console.time('process modland list')
-	fetch('modland.txt')
+	fetch('./lists/modland.txt')
 	.then(r => r.text())
 	.then(t => t.split('\n'))
 	.then(a => {
@@ -343,8 +370,8 @@ function fillModland(data) {
 				}
 
 				songs.push(url)
-		const ext = title.substr(title.lastIndexOf('.')+1).toUpperCase()
-		data.push( [url, author, title.substr(0, title.lastIndexOf('.')), ext, 'Modland'] )
+				const ext = title.substr(title.lastIndexOf('.')+1).toUpperCase()
+				data.push( [url, author, title.substr(0, title.lastIndexOf('.')), ext, 'Modland'] )
 				l++
 			}
 		}
@@ -364,6 +391,10 @@ function fillModland(data) {
 	.catch(e=>console.error(e))
 	
 }
+
+//
+// visualizers
+//
 let actViz = 0 // 0 = off, 1 = Goniometer, 2 = Spectogram
 function toggleViz() {
 	actViz++

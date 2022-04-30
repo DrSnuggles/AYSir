@@ -8,6 +8,7 @@ import {YMReader} from './reader/ym.js'
 import {FYMReader} from './reader/fym.js'
 import {PSGReader} from './reader/psg.js'
 import {VTXReader} from './reader/vtx.js'
+import {BSCReader} from './reader/bsc.js'
 //import {AYReader} from './reader/ay.js'
 
 let song, dest, sampleRate, msgStack = [], timer
@@ -82,9 +83,11 @@ function stop() {
 	msg('stop')
 }
 function config() {
-	msg('configure', [song.mode ? (song.mode != 'AY') : true, song.clock, sampleRate, song.stereoMode ? song.stereoMode : 'acb'])
+	msg('configure', [song.mode ? (song.mode != 'AY') : true, song.clock, sampleRate || 48000, song.stereoMode ? song.stereoMode : 'acb'])
 	/*
-	msg('setPan', [0, 0.1, 0]) // what is this panning ?? from ayumi ?? 0.1, 0.5, 0.9 ???
+	// what is this panning ?? from ayumi ?? 0.1, 0.5, 0.9 ???
+	// have seen this in at least Norbert Kehrers player
+	msg('setPan', [0, 0.1, 0])
 	msg('setPan', [1, 0.5, 0])
 	msg('setPan', [2, 0.9, 0])
 	*/
@@ -121,30 +124,36 @@ function startLoop() {
 }
 function initBuf(b, ext) {
 	try {
-		switch (ext) {
+		switch (ext) { // lowerCase
 			// register records
 			case 'fym':
-			song = new FYMReader(b)
-			break
+				song = new FYMReader(b)
+				break
 			case '.ym':
-			song = new YMReader(b)
-			break
+				song = new YMReader(b)
+				break
 			case 'psg':
-			song = new PSGReader(b)
-			break
+				song = new PSGReader(b)
+				break
 			case 'vtx':
-			song = new VTXReader(b)
-			break
-			
+				song = new VTXReader(b)
+				break
+				
 			// player mem dumps (also needs z80 emu)
 			case '.ay':
-			//song = new AYReader(b)
-			break
+				//song = new AYReader(b)
+				break
 			
 			// tracker data
+			case 'stk': // STHAKKER PRO
+				break
+			case 'sng': // v1.x BSC's Soundtrakker by Oliver Mayer
+			case '128': // v128
+				song = new BSCReader(b)
+				break
 			case 'pt3':
-			//song = new PT3Reader(b)
-			break
+				//song = new PT3Reader(b)
+				break
 			default:
 			// move to come...
 		}

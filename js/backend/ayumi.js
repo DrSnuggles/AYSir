@@ -210,6 +210,7 @@ class AYUMI extends AudioWorkletProcessor {
 	}
 
 	configure(isYM, clockRate, sr, panMode = 'MONO') {
+		//console.log(isYM, clockRate, sr, panMode)
 		this.step = clockRate / (sr * 8 * this.DECIMATE_FACTOR)
 		if (this.step > 1) {
 			this.step = 1
