@@ -342,9 +342,12 @@ export class BSCReader {
 	}
 	getNextFrame() {
 		// interrupt
-		//this.frame++
 		//if (this.frame > this.frameCount) this.frameCount = 0
 
+		// needed to make jump to pos possible
+		this.current_position_in_song_list = Math.floor(this.frame / this.pattern_length)
+		this.current_pattern_line = this.frame - this.current_position_in_song_list * this.pattern_length
+		
 		const chCnt = 3 // set back to 3 later ;)
 		// Loop over the 3 channels for the things to do in each interrupt
 		for (let i = 0; i < chCnt; i++) {
@@ -369,13 +372,13 @@ export class BSCReader {
 
 		// Set number of currently playing pattern
 		this.current_pattern = this.dump.getInt8(this.ADDR_SONG_LIST + this.current_position_in_song_list)
-		this.frame = this.current_pattern_line + this.current_position_in_song_list * this.pattern_length
+		//this.frame = this.current_pattern_line + this.current_position_in_song_list * this.pattern_length
+		this.frame++
 
 		// Loop over the 3 channels for the things to do in each pattern line
 		for (let i = 0; i < chCnt; i++) {
 			this.channelPlayEachPatternLine(i)
 		}
-
 		// Update counter for the pattern lines
 		this.current_pattern_line++
 		if (this.current_pattern_line < this.pattern_length) {

@@ -17,6 +17,7 @@ ToDo:
 
 ## History | Not sure what will happen here
 01.05.2022:
+- Set position in BSC
 - Multichannel Waveform
 - Goniometer back to Byte
 - Analyzer settings (FFTsize, MinDB, MaxDB, Smooth)

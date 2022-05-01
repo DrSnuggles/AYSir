@@ -155,7 +155,7 @@ async function setEngine(eng) {
 		const data = []
 		// TimeDomain or Frequency
 		if (actViz == 1) {
-			// freq
+			// freq (use binCount or fftSize/2)
 			for (let i = 0; i < analyserNodes.length; i++) {
 				data[i] = new Uint8Array(analyserNodes[i].frequencyBinCount)
 				analyserNodes[i].getByteFrequencyData(data[i])
