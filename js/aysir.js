@@ -22,6 +22,7 @@ let engine = getUrlParameter('engine').toLowerCase()
 if (engine == '') engine = 'ayumi'
 
 let currentSong = 0, song, isLoading = false, rAF
+const analyserNodes = []
 
 //
 // buffer fill worker
@@ -135,45 +136,47 @@ async function setEngine(eng) {
 	left.pan.value = -1.0
 	right.pan.value = 1.0
 	*/
-	const analyserNodes = []
+
 	for (let i = 0, e = ctx.destination.channelCount; i < e; i++) { // all channels the ctx has
 		analyserNodes[i] = ctx.createAnalyser()
-		analyserNodes[i].fftSize = 2048 // 2^5 .. 2^15 (32..32768) default 2048
+		analyserNodes[i].fftSize = 2048 // default = 2048 // 2^5 .. 2^15 (32..32768)
+		analyserNodes[i].minDecibels = -100 // default = -100
+		analyserNodes[i].maxDecibels = -30 // default = -30
+		analyserNodes[i].smoothingTimeConstant = 0.8 // default = 0.8
+		// Todo: ^^ needs to be set by visualizers, or ???
 		node.connect(analyserNodes[i], i, 0) // pick correct input channel
 	}
+	console.log(analyserNodes)
 	function analLoop() {
 		rAF = requestAnimationFrame(analLoop)  
+
+		if (actViz === 0) return
 
 		const data = []
 		// TimeDomain or Frequency
 		if (actViz == 1) {
-			for (let i = 0; i < analyserNodes.length; i++) {
-				data[i] = new Float32Array(analyserNodes[i].frequencyBinCount)
-				analyserNodes[i].getFloatTimeDomainData(data[i])
-			}
-		} else if (actViz == 2) {
+			// freq
 			for (let i = 0; i < analyserNodes.length; i++) {
 				data[i] = new Uint8Array(analyserNodes[i].frequencyBinCount)
 				analyserNodes[i].getByteFrequencyData(data[i])
 			}
+		} else {
+			// timedomain waveform, goniometer
+			for (let i = 0; i < analyserNodes.length; i++) {
+				data[i] = new Uint8Array(analyserNodes[i].fftSize)
+				analyserNodes[i].getByteTimeDomainData(data[i])
+			}
 		}
 
-		if (actViz !== 0) canvasWorker.postMessage({viz: actViz, data: data})
+		canvasWorker.postMessage({viz: actViz, data: data})
 	}
+
+	sendAudioInfo()
 
 	if (rAF) {
 		cancelAnimationFrame(rAF)
 		rAF = null
 	}
-	console.log(analyserNodes[0])
-	canvasWorker.postMessage({
-		fftSize: analyserNodes[0].fftSize,
-		minDB: analyserNodes[0].minDecibels,
-		maxDB: analyserNodes[0].maxDecibels,
-		smooth: analyserNodes[0].smoothingTimeConstant,
-		sampleRate: ctx.sampleRate,
-		channels: ctx.destination.channelCount,
-	})
 
 	rAF = requestAnimationFrame(analLoop)
 	
@@ -191,6 +194,16 @@ async function setEngine(eng) {
 	initWorker()
 	if (song) worker.postMessage({msg:'config'})
 
+}
+function sendAudioInfo() {
+	canvasWorker.postMessage({audioInfo: {
+		fftSize: analyserNodes[0].fftSize,
+		minDB: analyserNodes[0].minDecibels,
+		maxDB: analyserNodes[0].maxDecibels,
+		smooth: analyserNodes[0].smoothingTimeConstant,
+		sampleRate: ctx.sampleRate,
+		channels: ctx.destination.channelCount,
+	}})
 }
 function setPos(pos) { // todo: rethink this 0..1 float, could also be frame of frameCount
 	//const jumpTo = Math.floor(((song.frames.length) ? song.frames.length : song.frameCount) * pos)
@@ -395,12 +408,53 @@ function fillModland() {
 //
 // visualizers
 //
-let actViz = 0 // 0 = off, 1 = Goniometer, 2 = Spectogram
+let actViz = 0 // 0 = off, 1 = Spectrogram, 2 = Waveform, 3 = Goniometer
 function toggleViz() {
 	actViz++
-	if (actViz > 2) actViz = 0
-	if (actViz === 0) myViz.classList.remove('fadeIn')
-	if (actViz > 0) myViz.classList.add('fadeIn')
+	if (actViz > 3) actViz = 0
+	if (actViz === 0) {
+		myViz.classList.remove('fadeIn')
+		myVizCtrl.classList.remove('fadeIn')
+	}
+	if (actViz > 0) {
+		myViz.classList.add('fadeIn')
+		myVizCtrl.classList.add('fadeIn')
+	}
+
+	if (actViz == 1) {
+		myVizCtrlExt.classList.add('fadeIn')
+	} else {
+		myVizCtrlExt.classList.remove('fadeIn')
+	}
+
+}
+
+//
+// analyzer settings
+//
+function changeFFT(val) {
+	for(let i = 0; i < analyserNodes.length; i++) {
+		analyserNodes[i].fftSize = Math.pow(2, val)
+	}
+	sendAudioInfo()
+}
+function changeMinDB(val) {
+	for(let i = 0; i < analyserNodes.length; i++) {
+		analyserNodes[i].minDecibels = val
+	}
+	sendAudioInfo()
+}
+function changeMaxDB(val) {
+	for(let i = 0; i < analyserNodes.length; i++) {
+		analyserNodes[i].maxDecibels = val
+	}
+	sendAudioInfo()
+}
+function changeSmooth(val) {
+	for(let i = 0; i < analyserNodes.length; i++) {
+		analyserNodes[i].smoothingTimeConstant = val
+	}
+	sendAudioInfo()
 }
 
 //
@@ -415,7 +469,13 @@ window.AYSir = {
 	setEngine: setEngine,
 	setPos: setPos,
 	toggleViz: toggleViz,
+
+	changeFFT: changeFFT,
+	changeMinDB: changeMinDB,
+	changeMaxDB: changeMaxDB,
+	changeSmooth: changeSmooth,
 }
+
 
 //
 // Polyfills

@@ -3,11 +3,11 @@
 	Reworked by: DrSnuggles (no deps, class in offscreen canvas worker...)
 */
 
-export class Spectogram {
-	constructor(ctx, width, height, mode = 'LOG', weighting = 'A') {
+export class Spectrogram {
+	constructor(ctx,mode = 'LOG', weighting = 'A') {
 		this.ctx = ctx
-		this.width = width
-		this.height = height
+		this.width = ctx.canvas.width
+		this.height = ctx.canvas.height
 		this.colorMap = this.makeColorMap([
 			'#000000',
 			'#0000a0',
@@ -18,12 +18,12 @@ export class Spectogram {
 			'#ffffa0',
 			'#ffffff',
 		])
-		this.tempCanvas = new OffscreenCanvas(width, height)// for gradient ?? needed ??
+		this.tempCanvas = new OffscreenCanvas(this.width, this.height)// for gradient ?? needed ??
 		this.tempCtx = this.tempCanvas.getContext('2d', {alpha: false}) // for repeated copy
 		this.MODE = mode // LINEAR, LOG, CONSTANT_Q
 		this.WEIGHTING = weighting // NONE, A
 		
-		this.hCoeff = height*0.2 // top 20% are used for spec, lower 80% for history
+		this.hCoeff = this.height*0.2 // top 20% are used for spec, lower 80% for history
 		this.bins = 1024 // overwritten after audio init
 		this.nyquist = 48000 / 2 // half of sampleRate
 		this.lastData = []
@@ -119,10 +119,14 @@ export class Spectogram {
 		}
 	
 	}
-	setAudio(fft, sr, ch) {
-		this.bins = fft/2
-		this.nyquist = sr/2
-		this.channels = ch
+	setAudio(info) {
+		this.bins = info.fftSize/2
+		this.nyquist = info.sampleRate/2
+		this.channels = info.channels
+
+		// A Weighting
+		const freqTable = this.makeBinFreqs()
+		this._aWeightingLUT = freqTable.map(f => 0.5 + 0.5 * this._getAWeighting(f))
 	}
 
 	// Helpers

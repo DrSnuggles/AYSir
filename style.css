@@ -37,10 +37,29 @@ input[type=range] {
 	transition: opacity 0.4s ease-in-out;
 	z-index: -1;
 }
-#myViz.fadeIn {
+#myViz.fadeIn,
+#myVizCtrl.fadeIn
+{
 	opacity: 1;
 	z-index: 1;
 }
+#myVizCtrl {
+	position: absolute;
+	bottom: min(30vw, 30vh);
+	right: 0;
+	width: min(30vw, 30vh);
+	background: #0004;
+	opacity: 0;
+	transition: opacity 0.4s ease-in-out;
+	z-index: -1;
+}
+#myVizCtrlExt {
+	display: none;
+}
+#myVizCtrlExt.fadeIn {
+	display: block;
+}
+
 #infoTxt {
 	display: inline-block;
 	width: calc(100vw - 260px);

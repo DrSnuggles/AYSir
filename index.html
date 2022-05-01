@@ -49,8 +49,18 @@
 		</tr>
 	</table>
 
+	<!-- visualizers -->
 	<canvas id="myViz" width="512" height="512"></canvas> <!-- abs positioned visualizer -->
+	<div id="myVizCtrl"> <!-- also abs positioned -->
+		<input type="range" title="FFT size" oninput="AYSir.changeFFT(this.value)" min="5" max="15" value="11"/>
+		<span id="myVizCtrlExt">
+			<input type="range" title="Min DB" oninput="AYSir.changeMinDB(this.value)" min="-200" max="-51" value="-100"/>
+			<input type="range" title="Max DB" oninput="AYSir.changeMaxDB(this.value)" min="-50" max="10" value="-30"/>
+			<input type="range" title="Smoothing time" oninput="AYSir.changeSmooth(this.value)" min="0" max="0.9999" value="0.8" step="0.0001"/>
+		</span>
+	</div>
 
+	<!-- for audio playback policy -->
 	<div id="audioModal">👉 💻 👂 🎶</div>
 
 </body>

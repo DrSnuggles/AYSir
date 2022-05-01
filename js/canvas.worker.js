@@ -1,8 +1,9 @@
 /*
 	Worker for OffscreenCanvas
 */
+import {Waveform} from './visualizer/waveform.js'
+import {Spectrogram} from './visualizer/spectrogram.js'
 import {Goniometer} from './visualizer/goniometer.js'
-import {Spectogram} from './visualizer/spectogram.js'
 
 let viz = []
 
@@ -18,16 +19,17 @@ onmessage = function(e) {
 
 	// 1st init = transfer of offscreen canvas
 	if (e.data.canvas) {
-		const canv = e.data.canvas
-		viz.push(new Goniometer(canv.getContext('2d'), canv.width, canv.height))
-		viz.push(new Spectogram(canv.getContext('2d', {alpha: false}), canv.width, canv.height))
+		const tmp = e.data.canvas.getContext('2d')
+		viz.push(new Spectrogram(tmp))
+		viz.push(new Waveform(tmp))
+		viz.push(new Goniometer(tmp))
 		return
 	}
 
 	// 2nd init = after analyzer setup
-	if (e.data.fftSize) {
+	if (e.data.audioInfo) {
 		for (let i = 0; i < viz.length; i++) {
-			viz[i].setAudio(e.data.fftSize, e.data.sampleRate)
+			viz[i].setAudio(e.data.audioInfo)
 		}
 		return
 	}

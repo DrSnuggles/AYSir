@@ -7,10 +7,20 @@ Sir Sinclair died 2 days ago and i also have to fix a problem with zipped AY thi
 ToDo:
 - Random on/off
 - Save last index to localStorage
+
 - TS (6ch) support
 - PT3 (2, 1)
 
+- DJ Eq (3 band -32dB)
+- Equalizer (vol, gain, 10 band(31.25, 62.5, 125, 250, 500, 1k, 2k, 4k, 8k, 16k)) all +-12dB
+- pro Channel 31 band Eq (20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1k, 1.25k, 1.6k, 2k, 2.5k, 3.15k, 4k, 5k, 6.3k, 8k, 10k, 12.5k, 16k, 20k)
+
 ## History | Not sure what will happen here
+01.05.2022:
+- Multichannel Waveform
+- Goniometer back to Byte
+- Analyzer settings (FFTsize, MinDB, MaxDB, Smooth)
+
 30.04.2022:
 - Bugfix: Typo in BSCReader
 

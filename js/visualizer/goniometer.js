@@ -3,12 +3,12 @@
 */
 
 export class Goniometer {
-	constructor(ctx, width, height) {
+	constructor(ctx) {
 		this.ctx = ctx
-		this.width = width
-		this.height = height
-		this.strokeFG = 'rgba(30, 200, 10, 255)'
+		this.width = ctx.canvas.width
+		this.height = ctx.canvas.height
 		this.strokeBG = 'rgba(30, 200, 10, 255)'
+		this.strokeFG = 'rgba(30, 255, 10, 255)'
 	}
 	clear() {
 		const ctx = this.ctx
@@ -69,12 +69,12 @@ export class Goniometer {
 		let rotated
 		
 		// move to start point
-		rotated = this.rotate45deg(dataR[0], dataL[0]);  // Right channel is mapped to x axis
+		rotated = this.rotate45deg(this.toFloat(dataR[0]), this.toFloat(dataL[0]))  // Right channel is mapped to x axis
 		ctx.moveTo(rotated.x * width + width/2, rotated.y* height + height/2)
 		
 		// draw line
 		for (let i = 1; i < dataL.length; i++) {
-		 rotated = this.rotate45deg(dataR[i], dataL[i])
+		 rotated = this.rotate45deg(this.toFloat(dataR[i]), this.toFloat(dataL[i]))
 		 ctx.lineTo(rotated.x * width + width/2, rotated.y* height + height/2)
 		}
 		
@@ -83,6 +83,9 @@ export class Goniometer {
 	setAudio() {}
 		
 	// Helpers
+	toFloat(uint8) {
+		return (uint8-128)/128
+	}
 	rotate45deg(x, y) {
 		const tmp = this.cartesian2polar(x, y)
 		tmp.angle -= 0.78539816 // Rotate coordinate by 45 degrees
