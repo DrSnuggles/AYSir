@@ -5,6 +5,8 @@
 	https://www.grimware.org/doku.php/documentations/software/soundtrakker/dev.fileformat.128
 	looks like Norbert Kehrer's files are version 128 because offsets match
 */
+import {getStr} from './getStr.js'
+
 export class BSCReader {
 
 	// To translate musical keys to period length values

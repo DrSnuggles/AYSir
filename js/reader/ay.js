@@ -3,6 +3,9 @@
 	based on infos found:
 		https://documentation.help/AY-3-8910.12-ZX-Spectrum/ay_e04vt.htm
 */
+
+import {getStr} from './getStr.js'
+
 export class AYReader {
 
 	constructor(buf) {
@@ -143,20 +146,8 @@ export class AYReader {
 				chanB: this.dump.getUint8(baseOff+11, lE),
 				chanC: this.dump.getUint8(baseOff+12, lE),
 				noise: this.dump.getUint8(baseOff+13, lE),
-				data: getStrNULL(buf, baseOff+14),
+				data: getStr(buf, baseOff+14),
 			}
-		}
-		function getStrNULL(dump, ptr) { // NULL terminated
-			let c, r = ''
-			while (c = dump[ptr++]) r += String.fromCharCode(c)
-			return r
-		}
-		function getStr(dump, ptr, len) { // fixed length
-			let c, r = ''
-			for (let i = 0; i < len; i++) {
-				r += String.fromCharCode( dump[ptr++] )
-			}
-			return r
 		}
 	}
 

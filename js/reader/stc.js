@@ -3,6 +3,8 @@
 	based on infos found:
 		https://documentation.help/AY-3-8910.12-ZX-Spectrum/ay_e099f.htm
 */
+import {getStr} from './getStr.js'
+
 export class STCReader {
 
 	constructor(buf) {
@@ -29,14 +31,6 @@ export class STCReader {
 		this.identifier = getStr(buf, 7, 18) // not a fixed identifer
 
 		baseOff = 27 // rest is data
-
-		function getStr(dump, ptr, len) { // fixed length
-			let c, r = ''
-			for (let i = 0; i < len; i++) {
-				r += String.fromCharCode( dump[ptr++] )
-			}
-			return r
-		}
 	}
 
 	getNextFrame() {

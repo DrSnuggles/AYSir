@@ -4,6 +4,7 @@
 	Updated (set/getProgress/getTime, isTurbo=6ch): https://ym.mmcm.ru/fym.js?v5
 */
 import * as UZIP from '../UZIP.js'  // used by FYM
+import {getStr} from './getStr.js'
 
 export class FYMReader {
 
@@ -23,12 +24,6 @@ export class FYMReader {
 		this.isTurbo = ((this.offset + this.frameCount*14) < buf.length)
 		this.fullTime = this.frameCount / this.rate
 		this.progress = 0
-
-		function getStr(dump, ptr) { // NULL terminated
-			let c, r = ''
-			while (c = dump[ptr++]) r += String.fromCharCode(c)
-			return r
-		}
 	}
 
 	setProgress(k) {

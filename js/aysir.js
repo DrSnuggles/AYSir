@@ -19,7 +19,8 @@ function getUrlParameter(name) { // todo: i bet a dollar there are nicer ways to
 	return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '))
 }
 let engine = getUrlParameter('engine').toLowerCase()
-if (engine == '') engine = 'ayumi'
+const knownEngines = ['ayumi', 'gasman', 'vecx']
+if (knownEngines.indexOf(engine) === -1) engine = 'ayumi'
 
 let currentSong = 0, song, isLoading = false, rAF
 const analyserNodes = []
