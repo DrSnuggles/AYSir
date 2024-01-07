@@ -222,7 +222,7 @@ class AYUMI extends AudioWorkletProcessor {
 		this.setEnvelope(1)
 		for(let i = 0; i < this.channels.length; i++) {
 			this.setTone(i, 1)
-			this.setPan(0, panning[i], 1)
+			this.setPan(i, panning[i], 1)
 		}
 		
 		console.info('AYUMI backend set to YM:', isYM, ' panning:', panning)

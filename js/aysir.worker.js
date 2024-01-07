@@ -4,16 +4,21 @@
 */
 
 // FORMAT Readers
+// simple streams of AY regs
 import {YMReader} from './reader/ym.js'
 import {FYMReader} from './reader/fym.js'
 import {PSGReader} from './reader/psg.js'
 import {VTXReader} from './reader/vtx.js'
+// tracker
 import {BSCReader} from './reader/bsc.js'
+import {PT3Reader} from './reader/pt3.js'
+// need z80 emul
 //import {AYReader} from './reader/ay.js'
 
 let song, dest, sampleRate, msgStack = [], timer
 
 onmessage = function(e) {
+	//console.log('got a msg', e)
 	switch (e.data.msg) {
 		case undefined: // transfer of the worklet.node.port
 			if (e.data.dest) {
@@ -121,8 +126,10 @@ function startLoop() {
 			//song.frame = song.loopFrame ? song.loopFrame : 0
 		}
 	},(1000/song.rate))
+	console.log(`Timer started with rate ${song.rate} Hz = every ${1000/song.rate} ms`)
 }
 function initBuf(b, ext) {
+console.log('initBuf')	
 	try {
 		switch (ext) { // lowerCase
 			// register records
@@ -152,7 +159,7 @@ function initBuf(b, ext) {
 				song = new BSCReader(b)
 				break
 			case 'pt3':
-				//song = new PT3Reader(b)
+				song = new PT3Reader(b)
 				break
 			default:
 			// move to come...

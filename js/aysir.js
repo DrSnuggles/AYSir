@@ -1,5 +1,5 @@
 /* AYSIR by DrSnuggles
-	a ES6 module class ayumi based Audioworklet player
+	a ES6 module class for multiple Audioworklet players
 	AY SIR !! RiP
 
 	loader -> depacker -> FYMReader -> Pumper Worker -> AYUMI AudioWorklet
@@ -19,8 +19,8 @@ function getUrlParameter(name) { // todo: i bet a dollar there are nicer ways to
 	return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '))
 }
 let engine = getUrlParameter('engine').toLowerCase()
-const knownEngines = ['ayumi', 'gasman', 'vecx']
-if (knownEngines.indexOf(engine) === -1) engine = 'ayumi'
+const knownEngines = ['lunar', 'ayumi', 'gasman', 'vecx']
+if (knownEngines.indexOf(engine) === -1) engine = knownEngines[0]
 
 let currentSong = 0, song, isLoading = false, rAF
 const analyserNodes = []
@@ -103,7 +103,7 @@ async function setEngine(eng) {
 	console.log(ctx)
 
 	if (ctx.state == 'running') {
-	audioModal.classList.add('fadeOut')
+		audioModal.classList.add('fadeOut')
 	}
 
 	await ctx.audioWorklet.addModule(`./js/backend/${eng}.js`)
@@ -232,7 +232,7 @@ function playURL(url) {
 		//60, 33, 68, 79, 67, 84, 89, 80,
 		// this means a URL encoding prob in CORS worker !! ToDo in other project, but should be handled
 		if (b[0] === 60 && b[1] === 33 && b[2] === 68 && b[3] === 79) throw 'Got HTML content not a data buffer'
-		
+		//console.log('wanna post buf')
 		worker.postMessage({msg:'buf', ext: url.substr(-3).toLowerCase(), buf:b})
 		isLoading = false
 	})
@@ -300,6 +300,19 @@ addHandler.forEach((e) => {
 // get some songs
 //
 let songs = [], data = []
+/*
+songs.push('./songs/nq - Hara mamba scene (2019).pt3')
+songs.push('./songs/nq - Tom\'s diner (2021).pt3')
+songs.push('./songs/Scalesmann - Misfire (2014) (Chaos Constructions 2014, 1).pt3')
+data.push(['./songs/nq - Hara mamba scene (2019).pt3','nq','Hara mamba','PT3'])
+data.push(['./songs/nq - Tom\'s diner (2021).pt3','nq','Toms Diner', 'PT3'])
+data.push(['./songs/Scalesmann - Misfire (2014) (Chaos Constructions 2014, 1).pt3','scalesmann','Misfire','PT3'])
+songs.push('./songs/Engrossing Moments DH2020.pt3')
+data.push(['./songs/Engrossing Moments DH2020.pt3','','pt3.7','engross'])
+songSel.setAttribute('data', JSON.stringify(data) )
+loadAndPlayNextSong()
+*/
+//fillModland()
 fillNK()
 function fillNK() {
 	console.time('process NK list')
@@ -376,7 +389,7 @@ function fillModland() {
 			const author = tmp[1]
 			const title = tmp[tmp.length-1]
 			const ext = title.substr(title.indexOf('.')).toLowerCase()
-			if (['.ym','.vtx'].indexOf(ext) !== -1) {
+			if (['.ym','.vtx','.pt3'].indexOf(ext) !== -1) {
 				const url = 'https://ftp.modland.com/pub/modules/' + entry
 				const authorChange = (lastAuthor !== author)
 				if (authorChange) {

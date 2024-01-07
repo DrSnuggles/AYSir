@@ -16,3 +16,19 @@ function getStrNULL(dump, ptr) { // NULL terminated
 	while (c = dump[ptr++]) r += String.fromCharCode(c)
 	return r
 }
+
+export function findBytes(haystack, needle) { // returns positions found
+	// hay and needle are arrays
+	let r = [] // return of all findings
+
+	// loop once over haystack
+	for (let i = 0, e = haystack.length - needle.length; i < e; i++) { // needle should fit in
+		let j = 0
+		while (j < needle.length) {
+			if (haystack[i+j] !== needle[j]) break // not found
+			j++
+		}
+		if (j == needle.length) r.push(i) // found complete needle at pos i
+	}
+	return r
+}

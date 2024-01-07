@@ -2,13 +2,60 @@
 	by DrSnuggles
 	based on: ESPboy ... based on libayfly ... based on S.V. Bulba
 	and looking into Vortex Tracker II by S.V. Bulba
-	parser first ?
-	http://www.deater.net/weave/vmwprod/pt3_player/README_pt3.txt
 */
 
 import {getStr, findBytes} from './getStr.js'
 
 export class PT3Reader {
+
+	// version specific settings
+	VER = {
+		//{Volume table of Pro Tracker 3.3x - 3.4x}
+		PT3VolumeTable_33_34: [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
+		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02],
+		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03],
+		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04],
+		[0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05],
+		[0x00, 0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06],
+		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07],
+		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08],
+		[0x00, 0x00, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09],
+		[0x00, 0x00, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A],
+		[0x00, 0x00, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x09, 0x0A, 0x0B],
+		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C],
+		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D],
+		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E],
+		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]],
+
+		//{Volume table of Pro Tracker 3.5x}
+		PT3VolumeTable_35: [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
+		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02],
+		[0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03],
+		[0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x04, 0x04],
+		[0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05],
+		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06],
+		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07],
+		[0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08],
+		[0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x07, 0x07, 0x08, 0x08, 0x09],
+		[0x00, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x09, 0x0A],
+		[0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B],
+		[0x00, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B, 0x0C],
+		[0x00, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B, 0x0C, 0x0D],
+		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E],
+		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]],
+
+	}
+
+	/*
+	// TS sigs
+	TSsigs = [
+    	[0x50, 0x72, 0x6f, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x20, 0x33, 0x2e],
+		[0x56, 0x6f, 0x72, 0x74, 0x65, 0x78, 0x20, 0x54, 0x72, 0x61, 0x63, 0x6b, 0x65, 0x72, 0x20, 0x49, 0x49],
+	]
+	*/
+
 	constructor(buf) {
 		this.buf = buf
 		this.dump = new DataView(buf.buffer)
@@ -18,7 +65,7 @@ export class PT3Reader {
 		this.loopCount = 0
 		this.progress = 0
 		this.clock = 1773400 // 2000000 ST, 1773400 ZX, 1750000 Pent, 1500000 Vecx, 1000000 CPC, 3500000 Turbo?
-		this.rate = 50 // AYSir !! thats ZX ;) // 200 ST, 100 twiceInt, 60 ST, 50 ZX, 48.828 Pent
+		this.rate = 50 // 200 ST, 100 twiceInt, 60 ST, 50 ZX, 48.828 Pent
 		this.regs = [{
 			AY_CHNL_A_FINE: 0,
 			AY_CHNL_A_COARSE: 0,
@@ -55,7 +102,7 @@ export class PT3Reader {
 			AY_GPIO_B: 0
 		}]
 
-		const version = ((this.bin[13] >= '0') && (this.bin[13] <= '9')) ? this.bin[13]*1 : 6 // defaults to PT3.6
+		this.version = ((this.bin[13] >= '0') && (this.bin[13] <= '9')) ? this.bin[13]*1 : 6 // defaults to PT3.6
 		// ^^ needs rework also title+author
 		this.tracker = this.bin.substring(0,0x1C).trim()//getStr(buf, 0, 0x19).trim()
 		this.title = this.bin.substring(0x1E,0x3F).trim()//getStr(buf, 0x20, 0x19).trim()
@@ -70,141 +117,34 @@ export class PT3Reader {
 		this.isTurbo = sigPos
 		this.module1 = sigPos
 
-		const patStart = this.dump.getUint16(0x67, true)
 		// modules
 		this.mods = [{
 			buf: [...buf], // todo: split at second module
-			dump: this.dump, // todo: split and get rid of buf or dump
 			PT3_MusicName: getStr(buf, 0, 0x63),
-			version: ((this.bin[13] >= '0') && (this.bin[13] <= '9')) ? this.bin[13]*1 : 6, // defaults to PT3.6
 			PT3_TonTableId: buf[0x63], 			// 02
-			PT3_Delay: buf[0x64], 				// 04 speed
+			PT3_Delay: buf[0x64], 				// 04
 			PT3_NumberOfPositions: buf[0x65],	// 2B
 			PT3_LoopPosition: buf[0x66],		// 2A
 			PT3_PatternsPointer: this.dump.getUint16(0x67, true), // 005F littleEndian
 			PT3_SamplesPointers: Array.from({length: 32}, (_,i) => this.dump.getUint16(0x69+i*2, true) ),
 			PT3_OrnamentsPointers: Array.from({length: 16}, (_,i) => this.dump.getUint16(0x69+64+i*2, true) ),
-			PT3_PositionList: Array.from({length: buf[0x65]}, (_,i) => this.dump.getUint8(0x69+64+32+i, true) / 3), // 1, 2, 3, 4 ... this list has known length but is also FF terminated
-			// todo PT3_PositionList: Array.from({length: buf[0x65]}, (_,i) => this.dump.getUint8(0x69+64+32+i, true) + patStart), // 245, 248, ...
+			PT3_PositionList: Array.from({length: 128}, (_,i) => this.dump.getUint16(0x69+64+32+i*2, true) ),
 			PT3: {
-				version: version,
 				Env_Base_lo: 0,
 				Env_Base_hi: 0,
 			},
-			PT3_A: {
-				chanName: 'A',
-			},
-			PT3_B: {
-				chanName: 'B',
-			},
-			PT3_C: {
-				chanName: 'C',
-			},
-			// new parser
-			Samples: {},
-			Ornaments: {},
-			PositionsChannels: {},
+			PT3_A: {},
+			PT3_B: {},
+			PT3_C: {},
 		}]
-
-		// copy proper tables
-		this.mods[0].notes = this.getNoteTable(this.mods[0].version, this.mods[0].PT3_TonTableId)
-		this.mods[0].vols = this.getVolTable(this.mods[0].version)
-
+		// copy proper note tables
+		this.mods[0].notes = this.getNoteTable(this.mods[0].PT3.Version, this.mods[0].PT3.PT3_TonTableId)
 		// not yet set in mods[1]
+
 		this.readModule(0)
-		this.readSamples(0)
-		this.readOrnaments(0)
-		this.readPositions(0)
 		if (this.isTurbo) this.readModule(1)
 	}
 
-	// parser
-	readSamples(modNum) {
-		// named: 0..31
-		// lines: 4 bytes
-		const mod = this.mods[modNum]
-		for (let i = 0; i < mod.PT3_SamplesPointers.length; i++) {
-			let ptr = mod.PT3_SamplesPointers[i]
-			if (ptr !== 0) {
-				mod.Samples[i] = {
-					loop: mod.dump.getUint8(ptr++, true),
-					lines: [],
-				}
-				const length = mod.dump.getUint8(ptr++, true)
-				/* Bulba says:
-					Sample line structure
-					tne +000_ +00(00)_ F_
-					TNE 56667 899 AA B CD
-					
-					'T' means, that tone sound is allowed, and 't' means, that tone sound is not allowed in this line.
-					'N' means, that noise sound is allowed, and 'n' means, that noise sound is not allowed in this line.
-					'E' means, that envelope sound is allowed, and 'e' means, that envelope sound is not allowed in this line.
-					Column '5' contains sign of tone deviation from its base value.
-					Column '666' contains value of tone deviation in hexadecimal form. So, range of tone deviation from its base value is -FFF..+FFF. It's enough, because tone registers are 12-bit size in AY.
-					Column '7' contains marker of accumulation of tone deviation. '^' means, that accumulation is on, and '_' means, that accumulation is off.
-					Column '8' contains noise/envelope deviation sign.
-					Column '99' contains hexadecimal noise/envelope frequency deviation from base value.
-					Column 'AA' contains absolute (without sign) view of '99' column value.
-					Column 'B' contains mark of noise/envelope accumulation of deviation (like tone).
-					Field 'C' contains absolute amplitude value for this sample line.
-					Field 'D' can contain signs of increasing sample volume by one ('+'), decreasing sample volume by one ('-'), or sign '_', which means "leave sample volume without changes".
-
-					My 16 bit littleEndian read examples gave:
-					00011101 00000101
-					11001100 00000000
-					10001011 00000001
-					10001001 10000001
-					10001001 00000001
-					N7BTCCCC DDAAAAAE
-				*/
-				for (let l = 0; l < length; l++) {
-					const bits = mod.dump.getUint16(ptr+l*4, true)
-					mod.Samples[i].lines.push({
-						devT: mod.dump.getInt16(ptr+l*4 + 2, true),
-						enaE: bits & 1,
-						devNE: (((bits >> 1) & 31) > 15) ? ((bits >> 1) & 31)-32 : (bits >> 1) & 31, // signed !!
-						ampDir: (bits >> 6) & 3, // 0=_ 2=- 3=+
-						amp: (bits >> 8) & 15,
-						enaT: (bits >> 12) & 1,
-						accNE: (bits >> 13) & 1,
-						accT: (bits >> 14) & 1, // 0=_ 1=^
-						enaN: (bits >> 15) & 1,
-					})
-				}
-			}
-		}
-	}
-	readOrnaments(modNum) {
-		const mod = this.mods[modNum]
-		for (let i = 0; i < mod.PT3_OrnamentsPointers.length; i++) {
-			let ptr = mod.PT3_OrnamentsPointers[i]
-			if (ptr !== 0) {
-				mod.Ornaments[i] = {
-					loop: mod.dump.getUint8(ptr++, true),
-					seq: [],
-				}
-				const length = mod.dump.getUint8(ptr++, true)
-				for (let l = 0; l < length; l++) {
-					mod.Ornaments[i].seq.push( mod.dump.getInt8(ptr++, true) )
-				}
-			}
-		}
-	}
-	readPositions(modNum) {
-		const mod = this.mods[modNum]
-		for (let i = 0; i < mod.PT3_PositionList.length; i++) {
-			// based on 1, 2, 3     let ptr = mod.PT3_PositionList[i]*3*2 + mod.PT3_PatternsPointer // 3channels * 2bytes
-			let ptr = mod.PT3_PositionList[i]*3*2 + mod.PT3_PatternsPointer // 3channels * 2bytes
-			// todo      let ptr = mod.PT3_PositionList[i]
-			if (ptr !== 0) {
-				mod.PositionsChannels[i] = {
-					posA: mod.dump.getUint16(ptr, true), // read from here till 00
-					posB: mod.dump.getUint16(ptr+2, true),
-					posC: mod.dump.getUint16(ptr+4, true),
-				}
-			}
-		}
-	}
 	readModule(modNum) {
 		const mod = this.mods[modNum]
 		let i = mod.PT3_PositionList[0]
@@ -216,13 +156,13 @@ export class PT3Reader {
 		const PT3_A = mod.PT3_A
 		const PT3_B = mod.PT3_B
 		const PT3_C = mod.PT3_C
-		//PT3.Version = this.version
+		PT3.Version = this.version
 		PT3.DelayCounter = 1
 		PT3.Delay = mod.PT3_Delay // todo: check if source is used or not somewhere else
 		PT3.CurrentPosition = 0
-		PT3_A.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2
-		PT3_B.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2 + 2
-		PT3_C.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2 + 4
+		PT3_A.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2//this.getWord(mod.PT3_PatternsPointer + i * 2)
+		PT3_B.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2 + 2//this.getWord(mod.PT3_PatternsPointer + i * 2 + 2)
+		PT3_C.Address_In_Pattern = mod.PT3_PatternsPointer + i * 2 + 4//this.getWord(mod.PT3_PatternsPointer + i * 2 + 4)
 
 		PT3_A.OrnamentPointer = mod.PT3_OrnamentsPointers[0]
 		PT3_A.Loop_Ornament_Position = mod.buf[PT3_A.OrnamentPointer++]
@@ -298,50 +238,39 @@ export class PT3Reader {
 					return PT3NoteTable_REAL_34_35
 		}
 	}
-	getVolTable(ver) {
-		//{Volume table of Pro Tracker 3.3x - 3.4x}
-		const PT3VolumeTable_33_34 = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
-		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02],
-		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03],
-		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04],
-		[0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05],
-		[0x00, 0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06],
-		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07],
-		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08],
-		[0x00, 0x00, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09],
-		[0x00, 0x00, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A],
-		[0x00, 0x00, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x09, 0x0A, 0x0B],
-		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x09, 0x0A, 0x0B, 0x0C],
-		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D],
-		[0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E],
-		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]]
+	/*
+	PT3_GetNoteFreq(j, mod) {
+		// todo: get rid of this and copy proper table on init/change once ;)
+		const ver = this.mods[mod].PT3.Version
+		switch(this.mods[mod].PT3_TonTableId) {
+			case 0:
+				if(ver <= 3)
+					return PT3NoteTable_PT_33_34r[j]
+				else
+					return PT3NoteTable_PT_34_35[j]
+			case 1:
+				return PT3NoteTable_ST[j]
+			case 2:
+				if(ver <= 3)
+					return PT3NoteTable_ASM_34r[j]
+				else
+					return PT3NoteTable_ASM_34_35[j]
+			default:
+				if(ver <= 3)
+					return PT3NoteTable_REAL_34r[j]
+				else
+					return PT3NoteTable_REAL_34_35[j]
+		}
+	}
+	*/
 
-		//{Volume table of Pro Tracker 3.5x}
-		const PT3VolumeTable_35 = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
-		[0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01],
-		[0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02],
-		[0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03],
-		[0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x03, 0x04, 0x04],
-		[0x00, 0x00, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05],
-		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06],
-		[0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07],
-		[0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06, 0x07, 0x07, 0x08],
-		[0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x07, 0x07, 0x08, 0x08, 0x09],
-		[0x00, 0x01, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x09, 0x0A],
-		[0x00, 0x01, 0x01, 0x02, 0x03, 0x04, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B],
-		[0x00, 0x01, 0x02, 0x02, 0x03, 0x04, 0x05, 0x06, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B, 0x0C],
-		[0x00, 0x01, 0x02, 0x03, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0A, 0x0B, 0x0C, 0x0D],
-		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E],
-		[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]]
-
-		if (ver <= 4)
-			return PT3VolumeTable_33_34
-		else
-			return PT3VolumeTable_35
+	getWord(offset, modNum) {
+		//console.log('getWord', offset, modNum)
+		return this.mods[modNum].buf[offset] + this.mods[modNum].buf[offset+1]*256
 	}
 
 	PT3_PatternInterpreter(chan, modNum) {
+		console.log('PT3_PatternInterpreter', chan, modNum)
 		const mod = this.mods[modNum]
 		let quit = false,
 		flag9 = 0, flag8 = 0, flag5 = 0, flag4 = 0, flag3 = 0, flag2 = 0, flag1 = 0,
@@ -351,7 +280,6 @@ export class PT3Reader {
 
 		do {
 			let val = mod.buf[chan.Address_In_Pattern]
-console.log('PT3_PatternInterpreter', chan.chanName, chan.Address_In_Pattern, val.toString(16).padStart(2, '0'))
 			if(val >= 0xf0) {
 				chan.OrnamentPointer = mod.PT3_OrnamentsPointers[val - 0xf0]
 				chan.Loop_Ornament_Position = mod.buf[chan.OrnamentPointer++]
@@ -385,14 +313,13 @@ console.log('PT3_PatternInterpreter', chan.chanName, chan.Address_In_Pattern, va
 			} else if(val >= 0xb2 && val <= 0xbf) {
 				chan.Envelope_Enabled = true
 				this.regs[modNum].AY_ENV_SHAPE = val - 0xb1
-console.log('AY_ENV_SHAPE', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 				mod.PT3.Env_Base_hi = mod.buf[++chan.Address_In_Pattern]
 				mod.PT3.Env_Base_lo = mod.buf[++chan.Address_In_Pattern]
 				chan.Position_In_Ornament = 0
 				mod.PT3.Cur_Env_Slide = 0
 				mod.PT3.Cur_Env_Delay = 0
 			} else if(val == 0xb1) {
-				chan.Number_Of_Notes_To_Skip = mod.dump.getInt8(++chan.Address_In_Pattern, true)
+				chan.Number_Of_Notes_To_Skip = mod.buf[++chan.Address_In_Pattern]
 			} else if(val == 0xb0) {
 				chan.Envelope_Enabled = false
 				chan.Position_In_Ornament = 0
@@ -421,7 +348,6 @@ console.log('AY_ENV_SHAPE', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 					chan.Envelope_Enabled = false
 				else {
 					this.regs[modNum].AY_ENV_SHAPE = val - 0x10
-console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 					mod.PT3.Env_Base_hi = mod.buf[++chan.Address_In_Pattern]
 					mod.PT3.Env_Base_lo = mod.buf[++chan.Address_In_Pattern]
 					chan.Envelope_Enabled = true
@@ -461,7 +387,7 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 			if(counter == flag1) {
 				chan.Ton_Slide_Delay = mod.buf[chan.Address_In_Pattern++]
 				chan.Ton_Slide_Count = chan.Ton_Slide_Delay
-				chan.Ton_Slide_Step = mod.dump.getInt16(chan.Address_In_Pattern, true)
+				chan.Ton_Slide_Step = this.getWord(chan.Address_In_Pattern, modNum)
 				chan.Address_In_Pattern += 2
 				chan.SimpleGliss = true
 				chan.Current_OnOff = 0
@@ -473,7 +399,8 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 				chan.Ton_Slide_Delay = mod.buf[chan.Address_In_Pattern]
 				chan.Ton_Slide_Count = chan.Ton_Slide_Delay
 				chan.Address_In_Pattern += 3
-				chan.Ton_Slide_Step = Math.abs(mod.dump.getInt16(chan.Address_In_Pattern, true))
+				//chan.Ton_Slide_Step = Math.abs(short(this.getWord(mod.buf[chan.Address_In_Pattern], modNum)))
+				chan.Ton_Slide_Step = Math.abs(this.getWord(chan.Address_In_Pattern, modNum))
 				chan.Address_In_Pattern += 2
 				chan.Ton_Delta = mod.notes[chan.Note] - mod.notes[prnote]//PT3_GetNoteFreq(info, chan.Note, chip_num) - PT3_GetNoteFreq(info, prnote, chip_num)
 				chan.Slide_To_Note = chan.Note
@@ -493,9 +420,9 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 				chan.Ton_Slide_Count = 0
 				chan.Current_Ton_Sliding = 0
 			} else if(counter == flag8) {
-				mod.PT3.Env_Delay = mod.dump.getInt8(chan.Address_In_Pattern++, false)// mod.buf[chan.Address_In_Pattern++]
+				mod.PT3.Env_Delay = mod.buf[chan.Address_In_Pattern++]
 				mod.PT3.Cur_Env_Delay = mod.PT3.Env_Delay
-				mod.PT3.Env_Slide_Add = mod.dump.getInt16(chan.Address_In_Pattern, true)
+				mod.PT3.Env_Slide_Add = this.getWord(chan.Address_In_Pattern, modNum)
 				chan.Address_In_Pattern += 2
 			} else if(counter == flag9) {
 				mod.PT3.Delay = mod.buf[chan.Address_In_Pattern++]
@@ -503,14 +430,14 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 			counter--
 		}
 		chan.Note_Skip_Counter = chan.Number_Of_Notes_To_Skip // signed char
-		//console.log('chan.Note_Skip_Counter', chan.Note_Skip_Counter)
+		console.log('chan.Note_Skip_Counter', chan.Note_Skip_Counter)
 	}
 
 	PT3_ChangeRegisters(chan, out, modNum) { // addEnv and tempmixer are out object
 		const mod = this.mods[modNum]
 		let j, b1, b0, w
 		if(chan.Enabled) {
-			chan.Ton = mod.dump.getUint16(chan.SamplePointer + chan.Position_In_Sample * 4 + 2, true)
+			chan.Ton = this.getWord(chan.SamplePointer + chan.Position_In_Sample * 4 + 2, modNum)
 			chan.Ton += chan.Ton_Accumulator
 			b0 = mod.buf[chan.SamplePointer + chan.Position_In_Sample * 4]
 			b1 = mod.buf[chan.SamplePointer + chan.Position_In_Sample * 4 + 1]
@@ -552,7 +479,11 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 				chan.Amplitude = 0
 			else if(chan.Amplitude > 15) // max
 				chan.Amplitude = 15
-			chan.Amplitude = mod.vols[chan.Volume][chan.Amplitude] // now set on init
+			// todo: move to init
+			if(mod.PT3.Version <= 4)
+				chan.Amplitude = this.VER.PT3VolumeTable_33_34[chan.Volume][chan.Amplitude]
+			else
+				chan.Amplitude = this.VER.PT3VolumeTable_35[chan.Volume][chan.Amplitude]
 			if(((b0 & 1) == 0) && chan.Envelope_Enabled)
 				chan.Amplitude = chan.Amplitude | 16
 			if((b1 & 0x80) != 0) {
@@ -597,7 +528,6 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 			AddToEnv: 0,
 			TempMixer: 0
 		}
-		//console.log('CurrentPos: ', mod.PT3.CurrentPosition)
 
 		mod.PT3.DelayCounter--
 		//console.log('mod.PT3.DelayCounter', mod.PT3.DelayCounter)
@@ -611,11 +541,9 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 					if(mod.PT3.CurrentPosition == mod.PT3_NumberOfPositions)
 						mod.PT3.CurrentPosition = mod.PT3_LoopPosition
 
-					//console.log('old '+ mod.PT3_A.Address_In_Pattern + '\nnew '+ mod.PositionsChannels[mod.PT3.CurrentPosition].posA)
-					//mod.PT3_A.Address_In_Pattern = mod.PT3_PatternsPointer + mod.PT3_PositionList[mod.PT3.CurrentPosition] * 2
-					mod.PT3_A.Address_In_Pattern = mod.PositionsChannels[mod.PT3.CurrentPosition].posA//mod.PT3_PositionList[mod.PT3.CurrentPosition]
-					mod.PT3_B.Address_In_Pattern = mod.PositionsChannels[mod.PT3.CurrentPosition].posB//mod.PT3_PositionList[mod.PT3.CurrentPosition] + 2
-					mod.PT3_C.Address_In_Pattern = mod.PositionsChannels[mod.PT3.CurrentPosition].posC//mod.PT3_PositionList[mod.PT3.CurrentPosition] + 4
+					mod.PT3_A.Address_In_Pattern = mod.PT3_PatternsPointer + mod.PT3_PositionList[mod.PT3.CurrentPosition] * 2//this.getWord(mod.buf[mod.PT3_PatternsPointer + mod.PT3_PositionList[mod.PT3.CurrentPosition] * 2], modNum)//ay_sys_getword(&module[PT3_PatternsPointer + header->PT3_PositionList[PT3.CurrentPosition] * 2]);
+					mod.PT3_B.Address_In_Pattern = mod.PT3_PatternsPointer + mod.PT3_PositionList[mod.PT3.CurrentPosition] * 2 + 2
+					mod.PT3_C.Address_In_Pattern = mod.PT3_PatternsPointer + mod.PT3_PositionList[mod.PT3.CurrentPosition] * 2 + 4
 					mod.PT3.Noise_Base = 0
 				}
 				this.PT3_PatternInterpreter(mod.PT3_A, modNum)
@@ -651,7 +579,7 @@ console.log('AY_ENV_SHAPE2', this.regs[modNum].AY_ENV_SHAPE.toString(16))
 		this.regs[modNum].AY_CHNL_C_VOL = mod.PT3_C.Amplitude
 
 		this.regs[modNum].AY_NOISE_PERIOD = (mod.PT3.Noise_Base + mod.PT3.AddToNoise) & 31
-		const cur_env = mod.dump.getInt16(mod.PT3.Env_Base_lo, true) + out.AddToEnv + mod.PT3.Cur_Env_Slide
+		const cur_env = this.getWord(mod.PT3.Env_Base_lo, modNum) + out.AddToEnv + mod.PT3.Cur_Env_Slide
 		this.regs[modNum].AY_ENV_FINE = cur_env & 0xff
 		this.regs[modNum].AY_ENV_COARSE = (cur_env >> 8) & 0xff
 

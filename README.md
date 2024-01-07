@@ -16,6 +16,11 @@ ToDo:
 - pro Channel 31 band Eq (20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1k, 1.25k, 1.6k, 2k, 2.5k, 3.15k, 4k, 5k, 6.3k, 8k, 10k, 12.5k, 16k, 20k)
 
 ## History | Not sure what will happen here
+07.01.2024: Added https://github.com/lunarjournal/emu8910
+15.05.2022:
+- Started with PT3
+- unsure how to handle TS later (inside=reader or outside=worker with two Audioctx?)
+
 14.05.2022:
 - Bugfix engine names
 
@@ -77,6 +82,7 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 + AYUMI (compact code)
 + Gasman / Cowbell Demozoo (also had some format readers and a changed Lh4 lib, i put both lh4 libs together and made class)
 + jsVecx Engine
+- lunarjournal
 - CODEF / Phaser Antoine Santo Aka NoNameNo, Nicolas CHALLEIL Aka STuFF
 
 ## Maybe helpful Firefox config changes
@@ -99,6 +105,8 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 - http://www.julien-nevo.com/arkostracker/
 - https://bitbucket.org/zxtune/zxtune/src/develop/src/formats
 - http://leonard.oxg.free.fr/
+- https://zxtune.bitbucket.io/info/features/
+
 
 ### Soundtrakker
 - https://github.com/norbertkehrer/soundtrakker_player
@@ -135,11 +143,13 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 4. More Formats (Added by DrSnuggles)
 	+ FYM - https://ym.mmcm.ru/ - Zipped raw data, LittleEndian of registers just need to be streamed to PSG
 	- AKS - Arkos Tracker 1+2 3/9ch/unlimited channels + digidrums
-	- SKS - STarKos Tracker
-	- VT2 - Vortex Tracker 2
+		- https://www.grimware.org/doku.php/documentations/software/arkos.tracker/start
+		- http://www.julien-nevo.com/arkostracker/
+	- SKS - STarKos Tracker (https://www.julien-nevo.com/starkos/)
+	- VT2 - Vortex Tracker 2 (SV Bulba)
 	+ 128 - BSC's Soundtrakker (https://github.com/norbertkehrer/soundtrakker_player)
-	- Wyz - Wyz Tracker
-	- CHP - Chip'n'sfx
+	- Wyz - Wyz Tracker (https://github.com/AugustoRuiz/WYZTracker)
+	- CHP - Chip'n'sfx (http://cngsoft.no-ip.org/chipnsfx.htm)
 5. Format list from zxart.ee:
 	- AS0 - ASC Sound Master v0.x (2 songs)
 	- ASC - ASC Sound Master v1.x (1337 songs)

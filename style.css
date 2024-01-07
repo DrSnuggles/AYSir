@@ -79,7 +79,7 @@ input[type=range] {
 	line-height: 100vh;
 }
 #audioModal.fadeOut {
-    animation: fadeOut 500ms forwards;
+	animation: fadeOut 500ms forwards;
 }
 @keyframes fadeOut {
     0% {
