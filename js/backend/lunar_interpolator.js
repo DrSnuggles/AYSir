@@ -4,10 +4,7 @@
 
 export class Interpolator {
 	constructor() {
-		this.buffer = []
-		for (let i = 0; i < 4; i++) {
-			this.buffer[i] = 0x0
-		}
+		this.buffer = new Array(4).fill(0)
 		return this
 	}
 	step(x) {

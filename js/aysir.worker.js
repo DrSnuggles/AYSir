@@ -15,7 +15,7 @@ import {PT3Reader} from './reader/pt3.js'
 // need z80 emul
 //import {AYReader} from './reader/ay.js'
 
-let song, dest, sampleRate, msgStack = [], timer
+let song, dest, sampleRate, msgStack = [], timer, pan = 'ACB'
 
 onmessage = function(e) {
 	//console.log('got a msg', e)
@@ -74,6 +74,10 @@ onmessage = function(e) {
 		case 'jump':
 			song.frame = e.data.a
 			break
+		case 'pan':
+			pan = e.data.a
+			config()
+			break
 		default:
 			console.error('Unknown message from Module got: ', e.data)
 	}
@@ -88,7 +92,9 @@ function stop() {
 	msg('stop')
 }
 function config() {
-	msg('configure', [song.mode ? (song.mode != 'AY') : true, song.clock, sampleRate || 48000, song.stereoMode ? song.stereoMode : 'acb'])
+	//msg('configure', [song.mode ? (song.mode != 'AY') : true, song.clock, sampleRate || 48000, song.stereoMode ? song.stereoMode : 'acb'])
+	msg('configure', [song.mode ? (song.mode != 'AY') : true, song.clock, sampleRate || 48000, pan])
+	console.log(song)
 	/*
 	// what is this panning ?? from ayumi ?? 0.1, 0.5, 0.9 ???
 	// have seen this in at least Norbert Kehrers player
@@ -129,7 +135,7 @@ function startLoop() {
 	console.log(`Timer started with rate ${song.rate} Hz = every ${1000/song.rate} ms`)
 }
 function initBuf(b, ext) {
-console.log('initBuf')	
+	//console.log('initBuf')
 	try {
 		switch (ext) { // lowerCase
 			// register records

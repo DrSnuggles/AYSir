@@ -20,7 +20,7 @@
 		<tr> <!-- control -->
 			<td style="white-space:nowrap;">
 				<span onclick="AYSir.loadAndPlayNextSong()" title="Play random song">🎰</span>
-				<span onclick="AYSir.toggleViz()" title="Toggle Visualizer">ᨓ</span>
+				<!--<span onclick="AYSir.toggleViz()" title="Toggle Visualizer">ᨓ</span>-->
 			</td>
 			<td colspan="2">
 				<span title="Choose your engine :)">
@@ -30,6 +30,15 @@
 						<option value="gasman">Demozoo</option>
 						<option value="vecx">Vecx</option>
 						<!-- <option value="nonameno">CODEF (does not exist yet)</option> -->
+					</select>
+					<select id="PanSel" onchange="AYSir.setPan(this.value)" title="Channel panning">
+						<option value="MONO">MONO (0.5, 0.5, 0.5)</option>
+						<option value="ABC">ABC (0.25, 0.5, 0.75)</option>
+						<option value="ACB" selected>ACB (0.25, 0.75, 0.5)</option>
+						<option value="BAC">BAC (0.5, 0.25, 0.75)</option>
+						<option value="BCA">BCA (0.75, 0.25, 0.5)</option>
+						<option value="CAB">CAB (0.5, 0.75, 0.25)</option>
+						<option value="CBA">CBA (0.75, 0.5, 0.25)</option>
 					</select>
 				</span>
 				🎼<span id="infoTxt"></span> <!-- 🎵 🎶 -->
@@ -51,15 +60,7 @@
 	</table>
 
 	<!-- visualizers -->
-	<canvas id="myViz" width="512" height="512"></canvas> <!-- abs positioned visualizer -->
-	<div id="myVizCtrl"> <!-- also abs positioned -->
-		<input type="range" title="FFT size" oninput="AYSir.changeFFT(this.value)" min="5" max="15" value="11"/>
-		<span id="myVizCtrlExt">
-			<input type="range" title="Min DB" oninput="AYSir.changeMinDB(this.value)" min="-200" max="-51" value="-100"/>
-			<input type="range" title="Max DB" oninput="AYSir.changeMaxDB(this.value)" min="-50" max="10" value="-30"/>
-			<input type="range" title="Smoothing time" oninput="AYSir.changeSmooth(this.value)" min="0" max="0.9999" value="0.8" step="0.0001"/>
-		</span>
-	</div>
+	<canvas id="myViz"></canvas> <!-- abs positioned visualizer -->
 
 	<!-- for audio playback policy -->
 	<div id="audioModal">👉 💻 👂 🎶</div>

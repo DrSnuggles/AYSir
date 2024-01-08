@@ -4,6 +4,7 @@
 	Vol 0 should be 310 when measuread as a voltage, but we set it to 0 in order to have a volume=0 matching
 	the 0 level of a 16 bits unsigned sample (no sound output)
 */
+import {STEREO_MODES} from './stereo_modes.js'
 
 class Gasman extends AudioWorkletProcessor {
 
@@ -20,16 +21,7 @@ class Gasman extends AudioWorkletProcessor {
 		0.056376, 0.056376, 0.088220, 0.088220, 0.117568, 0.117568, 0.149977, 0.149977,
 		0.190123, 0.190123, 0.229088, 0.229088, 0.282717, 0.282717, 0.333324, 0.333324
 	]
-	STEREO_MODES = {
-		'ABC': [0.25, 0.5, 0.75],
-		'ACB': [0.25, 0.75, 0.5],
-		'BAC': [0.5, 0.25, 0.75],
-		'BCA': [0.75, 0.25, 0.5],
-		'CAB': [0.5, 0.75, 0.25],
-		'CBA': [0.75, 0.5, 0.25],
-		'MONO': [0.5, 0.5, 0.5]
-	}
-	
+
 	constructor() {
 		super()
 		this.port.onmessage = this.handleMessage_.bind(this)
@@ -85,7 +77,7 @@ class Gasman extends AudioWorkletProcessor {
 		/* envelope runs at double speed of an AY to cater for YM envelopes - in AY mode speed is halved again via volume table */
 		this.cyclesPerSampleEnv = this.frequency / this.sampleRate * 2
 
-		this.panning = this.STEREO_MODES[panMode.toUpperCase()]
+		this.panning = STEREO_MODES[panMode.toUpperCase()]
 		this.calcPanning()
 	} // configure
 	

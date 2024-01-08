@@ -4,26 +4,19 @@
 
 export class FirFilter {
 	constructor(h, m) {
-		this.buffer = []
-		this.index = 0x0
-		this.offset = 0x0
-		this.length = 0x0
-		this.m = 0x0
-		this.h = []
-		this.length = h.length * m
-		this.index = 0
 		this.m = m
 		this.h = h
-		for (let i = 0; i < this.length * 2; i++) {
-			this.buffer[i] = 0x0
-		}
+		this.length = h.length * m
+		this.index = 0
+		this.offset = 0
+		this.buffer = new Array(this.length * 2).fill(0)
 		return this
 	}
 	step(samples) {
 		const length = this.length
 		const m = this.m
 		const h = this.h
-		let y = 0x0
+		let y = 0
 		this.offset = length - (this.index * m)
 		var sub = this.buffer.slice(this.offset)
 		this.index = (this.index + 1) % (length / m - 1)

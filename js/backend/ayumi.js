@@ -3,6 +3,7 @@
 	Javascript version: Alexander Kovalenko
 	Original Author: Peter Sovietov
 */
+import {STEREO_MODES} from './stereo_modes.js'
 
 class AYUMI extends AudioWorkletProcessor {
 
@@ -29,15 +30,6 @@ class AYUMI extends AudioWorkletProcessor {
 		0.333730067903, 0.400427252613, 0.467383840696, 0.53443198291,
 		0.635172045472, 0.75800717174, 0.879926756695, 1.0
 	]
-	STEREO_MODES = { // from Gasman / Demozoo
-		'ABC': [0.25, 0.5, 0.75],
-		'ACB': [0.25, 0.75, 0.5],
-		'BAC': [0.5, 0.25, 0.75],
-		'BCA': [0.75, 0.25, 0.5],
-		'CAB': [0.5, 0.75, 0.25],
-		'CBA': [0.75, 0.5, 0.25],
-		'MONO': [0.5, 0.5, 0.5]
-	}
 
 	constructor() {
 		super()
@@ -217,7 +209,7 @@ class AYUMI extends AudioWorkletProcessor {
 			console.warn('Step size locked to 1.0. Audio may sound different from original')
 		}
 		this.dacTable = isYM ? this.YM_DAC_TABLE : this.AY_DAC_TABLE
-		const panning = this.STEREO_MODES[panMode.toUpperCase()]
+		const panning = STEREO_MODES[panMode.toUpperCase()]
 		this.noise = 1
 		this.setEnvelope(1)
 		for(let i = 0; i < this.channels.length; i++) {
@@ -428,11 +420,6 @@ class AYUMI extends AudioWorkletProcessor {
 			case 'configure':
 				this.configure(r[0], r[1], r[2], r[3])
 				break
-			/* not used anymore, stereomodes instead
-			case 'setPan':
-				this.setPan(r[0], r[1], r[2])
-				break
-			*/
 			case 'stop':
 				r = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 				// intentional fall through

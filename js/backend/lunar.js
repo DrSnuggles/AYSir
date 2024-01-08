@@ -5,9 +5,10 @@
 import {Interpolator} from './lunar_interpolator.js'
 import {FirFilter} from './lunar_firFilter.js'
 import {BiasFilter} from './lunar_biasFilter.js'
+import {STEREO_MODES} from './stereo_modes.js'
 
-const 	// See: https://www.arc.id.au/FilterDesign.html
-FIR = [-0.011368,
+const FIR = [	// See: https://www.arc.id.au/FilterDesign.html
+	-0.011368,
 	0.004512,
 	0.008657,
 	-0.011763,
@@ -64,16 +65,7 @@ FIR = [-0.011368,
 	0.008657,
 	0.004512,
 	-0.011368
-],
-STEREO_MODES = { // from Gasman / Demozoo
-	'ABC': [0.25, 0.5, 0.75],
-	'ACB': [0.25, 0.75, 0.5],
-	'BAC': [0.5, 0.25, 0.75],
-	'BCA': [0.75, 0.25, 0.5],
-	'CAB': [0.5, 0.75, 0.25],
-	'CBA': [0.75, 0.5, 0.25],
-	'MONO': [0.5, 0.5, 0.5]
-}
+]
 
 class PSG49 extends AudioWorkletProcessor {
 	constructor() {
@@ -456,7 +448,7 @@ class PSG49 extends AudioWorkletProcessor {
 	}
 
 	configure(isYM, clockRate, sr, panMode = 'MONO') {
-		//console.log(isYM, clockRate, sr, panMode)
+		console.log(isYM, clockRate, sr, panMode)
 
 		this.clock.frequency = clockRate
 		this.deviceSampleRate = sr
@@ -468,7 +460,6 @@ class PSG49 extends AudioWorkletProcessor {
 		
 		console.info('Lunar backend set to YM:', isYM, ' panning:', panning)
 	}
-
 
 	handleMessage_(event) {
 		//console.log('[Processor:Received] ',event.data.msg, event.data.a?.length)

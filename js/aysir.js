@@ -4,8 +4,10 @@
 
 	loader -> depacker -> FYMReader -> Pumper Worker -> AYUMI AudioWorklet
 	|     MODULE        |        WORKER              |    AudioWorklet
-
 */
+
+import {Visualizer} from '/visualizer/visualizer.min.js'
+//import {Visualizer} from '/visualizer/visualizer_dev.js'
 
 //
 // Force SSL, else AudioWorklet wont work
@@ -22,8 +24,7 @@ let engine = getUrlParameter('engine').toLowerCase()
 const knownEngines = ['lunar', 'ayumi', 'gasman', 'vecx']
 if (knownEngines.indexOf(engine) === -1) engine = knownEngines[0]
 
-let currentSong = 0, song, isLoading = false, rAF
-const analyserNodes = []
+let isLoading = false, rAF, song, vis
 
 //
 // buffer fill worker
@@ -62,15 +63,7 @@ function initWorker() {
 	}})
 }
 
-//
-// Canvas offscreen worker
-//
-// ToDo: initiate on open and different types...
-const offscreen = document.querySelector('#myViz').transferControlToOffscreen()
-//const canvasWorker = new Worker('./js/goniometer.js', {type: 'module'})
-//const canvasWorker = new Worker('./js/spectogram.js', {type: 'module'})
-const canvasWorker = new Worker('./js/canvas.worker.js', {type: 'module'})
-canvasWorker.postMessage({ canvas: offscreen }, [offscreen]) // its nicer to pack the transfered objects into a new one
+
 
 //
 // audio context
@@ -116,10 +109,17 @@ async function setEngine(eng) {
 
 	//node.connect(ctx.destination) // no gain in between this time
 	// rewire with gain node for volume control
+	if (!vis?.settings)
+		vis = new Visualizer(node, myViz, {fps: 30, fftSize: 11})
+	else
+		vis.analyzer.setSource(node)
+
+	node.disconnect(ctx.destination)
 	gain = ctx.createGain()
 	node.connect(gain)
 	gain.connect(ctx.destination)
 	setGain(gainVal)
+
 
 	// single stereo analyzer vs 2 mono nodes or more general just how many nodes
 	// rewire for analyzers (two) from worklet node, oops it's different, will keep my normal aproach here for reference, also had to change the backends
@@ -137,7 +137,7 @@ async function setEngine(eng) {
 	left.pan.value = -1.0
 	right.pan.value = 1.0
 	*/
-
+	/* in viz
 	for (let i = 0, e = ctx.destination.channelCount; i < e; i++) { // all channels the ctx has
 		analyserNodes[i] = ctx.createAnalyser()
 		analyserNodes[i].fftSize = 2048 // default = 2048 // 2^5 .. 2^15 (32..32768)
@@ -168,11 +168,9 @@ async function setEngine(eng) {
 				analyserNodes[i].getByteTimeDomainData(data[i])
 			}
 		}
-
+		
 		canvasWorker.postMessage({viz: actViz, data: data})
-	}
 
-	sendAudioInfo()
 
 	if (rAF) {
 		cancelAnimationFrame(rAF)
@@ -180,6 +178,10 @@ async function setEngine(eng) {
 	}
 
 	rAF = requestAnimationFrame(analLoop)
+	}
+	*/
+
+	sendAudioInfo()
 	
 	// stupid no audio till user interaction policy thingy
 	function resume() {
@@ -197,6 +199,7 @@ async function setEngine(eng) {
 
 }
 function sendAudioInfo() {
+	return // todo
 	canvasWorker.postMessage({audioInfo: {
 		fftSize: analyserNodes[0].fftSize,
 		minDB: analyserNodes[0].minDecibels,
@@ -212,9 +215,19 @@ function setPos(pos) { // todo: rethink this 0..1 float, could also be frame of 
 	worker.postMessage({msg:'jump', a:jumpTo})
 }
 
+function setPan(pan) {
+	worker.postMessage({msg:'pan', a:pan})
+}
+
 function loadAndPlayNextSong() {
-	currentSong = (currentSong + 1) % songs.length
-	playURL( songs[currentSong] )
+	//currentSong = (currentSong + 1) % songs.length
+	//playURL( songs[currentSong] )
+	// changed to kkRows method
+	songSel.worker.postMessage({msg:'getRandom', callback:'tblRandom'})
+}
+window.tblRandom = (r) => {
+	const l = r.rng ? r.rng : r	// rng chosen or real click
+	playURL( l[0].replace(/\&amp;/g,'&'), (l[1] === 'Radio') ? true : false)			// Berluskoni - Flimbos Quest
 }
 function playURL(url) {
 	if (isLoading) return
@@ -389,7 +402,7 @@ function fillModland() {
 			const author = tmp[1]
 			const title = tmp[tmp.length-1]
 			const ext = title.substr(title.indexOf('.')).toLowerCase()
-			if (['.ym','.vtx','.pt3'].indexOf(ext) !== -1) {
+			if (['.ym','.vtx','.XXXpt3'].indexOf(ext) !== -1) { // ToDo: enable PT3
 				const url = 'https://ftp.modland.com/pub/modules/' + entry
 				const authorChange = (lastAuthor !== author)
 				if (authorChange) {
@@ -402,9 +415,10 @@ function fillModland() {
 				l++
 			}
 		}
+
 		songSel.setAttribute('data', JSON.stringify(data) )
 
-		songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
+		//songs = songs.map((a) => [Math.random(),a]).sort((a,b) => a[0]-b[0]).map((a) => a[1])
 
 		console.timeEnd('process modland list')
 		console.log('Modland songlist contains: ', l)
@@ -413,61 +427,42 @@ function fillModland() {
 		// start the show, emm audio
 		//
 		loadAndPlayNextSong()
+		//toggleViz()
 
 	})
 	.catch(e=>console.error(e))
-	
-}
-
-//
-// visualizers
-//
-let actViz = 0 // 0 = off, 1 = Spectrogram, 2 = Waveform, 3 = Goniometer
-function toggleViz() {
-	actViz++
-	if (actViz > 3) actViz = 0
-	if (actViz === 0) {
-		myViz.classList.remove('fadeIn')
-		myVizCtrl.classList.remove('fadeIn')
-	}
-	if (actViz > 0) {
-		myViz.classList.add('fadeIn')
-		myVizCtrl.classList.add('fadeIn')
-	}
-
-	if (actViz == 1) {
-		myVizCtrlExt.classList.add('fadeIn')
-	} else {
-		myVizCtrlExt.classList.remove('fadeIn')
-	}
-
 }
 
 //
 // analyzer settings
 //
 function changeFFT(val) {
-	for(let i = 0; i < analyserNodes.length; i++) {
-		analyserNodes[i].fftSize = Math.pow(2, val)
+	const x = Math.pow(2, val)
+	for(let i = 0; i < vis.analyzer.analyserNodes.length; i++) {
+		vis.analyzer.analyserNodes[i].fftSize = x
 	}
+	vis.analyzer.analyserNode.fftSize = x
 	sendAudioInfo()
 }
 function changeMinDB(val) {
-	for(let i = 0; i < analyserNodes.length; i++) {
-		analyserNodes[i].minDecibels = val
+	for(let i = 0; i < vis.analyzer.analyserNodes.length; i++) {
+		vis.analyzer.analyserNodes[i].minDecibels = val
 	}
+	vis.analyzer.analyserNode.minDecibels = val
 	sendAudioInfo()
 }
 function changeMaxDB(val) {
-	for(let i = 0; i < analyserNodes.length; i++) {
-		analyserNodes[i].maxDecibels = val
+	for(let i = 0; i < vis.analyzer.analyserNodes.length; i++) {
+		vis.analyzer.analyserNodes[i].maxDecibels = val
 	}
+	vis.analyzer.analyserNode.maxDecibels = val
 	sendAudioInfo()
 }
 function changeSmooth(val) {
-	for(let i = 0; i < analyserNodes.length; i++) {
-		analyserNodes[i].smoothingTimeConstant = val
+	for(let i = 0; i < vis.analyzer.analyserNodes.length; i++) {
+		vis.analyzer.analyserNodes[i].smoothingTimeConstant = val
 	}
+	vis.analyzer.analyserNode.smoothingTimeConstant = val
 	sendAudioInfo()
 }
 
@@ -481,8 +476,9 @@ window.AYSir = {
 	},
 	setGain: setGain,
 	setEngine: setEngine,
+	setPan: setPan,
 	setPos: setPos,
-	toggleViz: toggleViz,
+	//toggleViz: toggleViz,
 
 	changeFFT: changeFFT,
 	changeMinDB: changeMinDB,

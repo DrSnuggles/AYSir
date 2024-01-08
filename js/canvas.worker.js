@@ -2,7 +2,7 @@
 	Worker for OffscreenCanvas
 */
 import {Waveform} from './visualizer/waveform.js'
-import {Spectrogram} from './visualizer/spectrogram.js'
+import {Spectrogram} from './visualizer/spectogram.js'
 import {Goniometer} from './visualizer/goniometer.js'
 
 let viz = []
