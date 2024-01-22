@@ -441,7 +441,7 @@ class PSG49 extends AudioWorkletProcessor {
 		for(let i = 0; i < bufferSize; i++) {
 			const vals = this.step()
 			outputList[0][0][i] = bias + this.bias[0].step(vals[0])
-			outputList[1][0][i] = bias + this.bias[1].step(vals[1])
+			outputList[0][1][i] = bias + this.bias[1].step(vals[1])
 		}
 
 		return true // def. needed for Chrome

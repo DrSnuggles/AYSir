@@ -547,11 +547,7 @@ class VecxAudioProcessor extends AudioWorkletProcessor {
 		
 		if (this.psg.ready) {
 			this.callback(outputList[0][0], outputList[0][0].length)
-			/*
-			for(let i = 0; i < outputList[0][0].length; i++) {
-				outputList[0][0][i] = Math.random()
-			}
-			*/
+			outputList[0][1].set(outputList[0][0])
 		}
 
 		return true // def. needed for Chrome

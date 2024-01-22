@@ -91,7 +91,7 @@ class AYUMI extends AudioWorkletProcessor {
 			this.AYUMIprocess()
 			this.removeDC()
 			outputList[0][0][i] = this.left
-			outputList[1][0][i] = this.right
+			outputList[0][1][i] = this.right
 		}
 
 		return true // def. needed for Chrome

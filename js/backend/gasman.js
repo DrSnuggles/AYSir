@@ -169,7 +169,7 @@ class Gasman extends AudioWorkletProcessor {
 			outputList[0][0][i] = (
 				this.panVolumeAdjust[0][0] * levelA + this.panVolumeAdjust[1][0] * levelB + this.panVolumeAdjust[2][0] * levelC
 			)
-			outputList[1][0][i] = (
+			outputList[0][1][i] = (
 				this.panVolumeAdjust[0][1] * levelA + this.panVolumeAdjust[1][1] * levelB + this.panVolumeAdjust[2][1] * levelC
 			)
 		}

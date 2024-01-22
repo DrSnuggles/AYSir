@@ -102,8 +102,8 @@ async function setEngine(eng) {
 	await ctx.audioWorklet.addModule(`./js/backend/${eng}.js`)
 	node = new AudioWorkletNode(ctx, `${eng}-audio-processor`, {
 		numberOfInputs: 0,
-		numberOfOutputs: 2,
-		outputChannelCount: [1, 1]
+		numberOfOutputs: 1,
+		outputChannelCount: [2]
 	})
 	node.port.onmessage = (e) => console.log(e.data) // this direction is not used
 
