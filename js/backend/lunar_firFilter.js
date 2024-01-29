@@ -18,13 +18,13 @@ export class FirFilter {
 		const h = this.h
 		let y = 0
 		this.offset = length - (this.index * m)
-		var sub = this.buffer.slice(this.offset)
+		const sub = this.buffer.slice(this.offset)
 		this.index = (this.index + 1) % (length / m - 1)
 		for (let i = m - 1; i >= 0; i--) {
 			this.buffer[this.offset + i] = samples[i]
 		}
 		for (let i = 0; i < h.length; i++) {
-			y += h[i] * sub[i]
+			y += h[i] * (sub[i] + sub[h.length - i - 1])
 		}
 		for (let i = 0; i < m; i++) {
 			this.buffer[this.offset + length - m + i] = this.buffer[this.offset + i]
