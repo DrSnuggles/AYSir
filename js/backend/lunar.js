@@ -495,6 +495,56 @@ class PSG49 extends AudioWorkletProcessor {
 					this.register.ENV_SHAPE = r[13]
 				}
 				break
+			case 'write':
+				r = event.data.r
+				const v = event.data.v
+				switch (r) {
+					case 0:
+						this.register.A_FINE = v
+						break
+					case 1:
+						this.register.A_COARSE = v
+						break
+					case 2:
+						this.register.B_FINE = v
+						break
+					case 3:
+						this.register.B_COARSE = v
+						break
+					case 4:
+						this.register.C_FINE = v
+						break
+					case 5:
+						this.register.C_COARSE = v
+						break
+					case 6:
+						this.register.NOISE_PERIOD = v
+						break
+					case 7:
+						this.register.MIXER = v
+						break
+					case 8:
+						this.register.A_VOL = v
+						break
+					case 9:
+						this.register.B_VOL = v
+						break
+					case 10:
+						this.register.C_VOL = v
+						break
+					case 11:
+						this.register.ENV_FINE = v
+						break
+					case 12:
+						this.register.ENV_COARSE = v
+						break
+					case 13:
+						if (v != 0xff) this.register.ENV_SHAPE = v
+						break
+					default:
+						console.log('Received unknown message from Worker',event.data.msg, event.data.r, event.data.v)
+				}
+				break
 			default:
 				console.log('Received unknown message from Worker',event.data.msg, event.data.a?.length)
 		}

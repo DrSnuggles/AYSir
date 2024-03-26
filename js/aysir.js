@@ -21,7 +21,7 @@ function getUrlParameter(name) { // todo: i bet a dollar there are nicer ways to
 	return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '))
 }
 let engine = getUrlParameter('engine').toLowerCase()
-const knownEngines = ['lunar', 'ayumi', 'gasman', 'vecx']
+const knownEngines = ['lunar', 'ponceto', 'ayumi', 'gasman', 'vecx']
 if (knownEngines.indexOf(engine) === -1) engine = knownEngines[0]
 
 let isLoading = false, rAF, song, vis
@@ -192,7 +192,7 @@ async function setEngine(eng) {
 	}
 	addEventListener('keydown', resume)
 	addEventListener('click', resume)
-	addEventListener('touchstart', resume)
+	addEventListener('touchend', resume)
 	
 	initWorker()
 	if (song) worker.postMessage({msg:'config'})

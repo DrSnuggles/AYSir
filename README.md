@@ -7,11 +7,11 @@ Sir Sinclair died 2 days ago and i also have to fix a problem with zipped AY thi
 ToDo:
 - Random on/off
 - Save last index to localStorage
-
 - TS (6ch) support
 - PT3 (2, 1)
 
 ## History | Not sure what will happen here
+26.03.2024: Added https://github.com/ponceto/aym-js
 08.01.2024: Added panning, random song by kkRows, switched to my visualizer (which is an evolution of initial AYSir viz)
 07.01.2024: Added https://github.com/lunarjournal/emu8910
 15.05.2022:
@@ -79,7 +79,9 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 + AYUMI (compact code)
 + Gasman / Cowbell Demozoo (also had some format readers and a changed Lh4 lib, i put both lh4 libs together and made class)
 + jsVecx Engine
-- lunarjournal
++ lunarjournal
++ ponceto
+- https://github.com/ponceto/aym-js/tree/master/src/static/vendor/aym-js/js
 - CODEF / Phaser Antoine Santo Aka NoNameNo, Nicolas CHALLEIL Aka STuFF
 
 ## Maybe helpful Firefox config changes
@@ -103,6 +105,8 @@ Is more than one worklet possible for turbo dual mode with two AY/YM chips emula
 - https://bitbucket.org/zxtune/zxtune/src/develop/src/formats
 - http://leonard.oxg.free.fr/
 - https://zxtune.bitbucket.io/info/features/
+- https://sndh.atari.org/
+- https://sndh.oxygenedemos.com/
 
 
 ### Soundtrakker
